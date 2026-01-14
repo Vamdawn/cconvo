@@ -6,7 +6,9 @@ import { scanProjects, findConversation } from './core/scanner.js';
 import { parseConversation } from './core/parser.js';
 import { exportConversation, getFileExtension } from './exporters/index.js';
 import { formatDateTime, formatSize, formatTokens } from './utils/format.js';
+import { generateCompletion, getInstallInstructions } from './completion.js';
 import type { ExportOptions } from './models/types.js';
+import type { ShellType } from './completion.js';
 
 const program = new Command();
 
@@ -208,6 +210,45 @@ program
       console.error(chalk.red((error as Error).message));
       process.exit(1);
     }
+  });
+
+// completion 命令
+program
+  .command('completion [shell]')
+  .description('Generate shell completion script (bash, zsh, fish)')
+  .action((shell?: string) => {
+    const validShells = ['bash', 'zsh', 'fish'];
+
+    if (!shell) {
+      console.log(chalk.bold('Usage: cc-exporter completion <shell>'));
+      console.log();
+      console.log('Generate shell completion scripts for cc-exporter.');
+      console.log();
+      console.log(chalk.bold('Supported shells:'));
+      console.log('  bash    Bash shell completion');
+      console.log('  zsh     Zsh shell completion');
+      console.log('  fish    Fish shell completion');
+      console.log();
+      console.log(chalk.bold('Examples:'));
+      console.log(chalk.gray('  # Bash'));
+      console.log('  cc-exporter completion bash >> ~/.bashrc');
+      console.log();
+      console.log(chalk.gray('  # Zsh'));
+      console.log('  cc-exporter completion zsh > ~/.zsh/completions/_cc-exporter');
+      console.log();
+      console.log(chalk.gray('  # Fish'));
+      console.log('  cc-exporter completion fish > ~/.config/fish/completions/cc-exporter.fish');
+      return;
+    }
+
+    if (!validShells.includes(shell)) {
+      console.error(chalk.red(`Error: Unsupported shell "${shell}"`));
+      console.error(`Supported shells: ${validShells.join(', ')}`);
+      process.exit(1);
+    }
+
+    const completionScript = generateCompletion(shell as ShellType);
+    console.log(completionScript);
   });
 
 export { program };
