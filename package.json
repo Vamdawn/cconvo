@@ -3,16 +3,28 @@
   "version": "1.0.0",
   "description": "Interactive CLI tool to browse and export Claude Code conversations",
   "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
     "cc-exporter": "./dist/index.js"
   },
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
     "lint": "eslint src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm typecheck"
   },
   "keywords": [
     "claude",
@@ -20,8 +32,16 @@
     "exporter",
     "conversation"
   ],
-  "author": "",
+  "author": "vamdawn <vamdawn@outlook.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vamdawn/cc-exporter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Vamdawn/cc-exporter/issues"
+  },
+  "homepage": "https://github.com/Vamdawn/cc-exporter#readme",
   "dependencies": {
     "chalk": "^5.3.0",
     "cli-table3": "^0.6.5",
