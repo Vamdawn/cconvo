@@ -1,4 +1,4 @@
-# cc-exporter 开发规范
+# cconvo 开发规范
 
 ## 开发环境
 

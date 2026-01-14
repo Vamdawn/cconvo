@@ -13,7 +13,7 @@ import type { ShellType } from './completion.js';
 const program = new Command();
 
 program
-  .name('cc-exporter')
+  .name('cconvo')
   .description('Interactive CLI tool to browse and export Claude Code conversations')
   .version('1.0.0');
 
@@ -220,9 +220,9 @@ program
     const validShells = ['bash', 'zsh', 'fish'];
 
     if (!shell) {
-      console.log(chalk.bold('Usage: cc-exporter completion <shell>'));
+      console.log(chalk.bold('Usage: cconvo completion <shell>'));
       console.log();
-      console.log('Generate shell completion scripts for cc-exporter.');
+      console.log('Generate shell completion scripts for cconvo.');
       console.log();
       console.log(chalk.bold('Supported shells:'));
       console.log('  bash    Bash shell completion');
@@ -231,13 +231,13 @@ program
       console.log();
       console.log(chalk.bold('Examples:'));
       console.log(chalk.gray('  # Bash'));
-      console.log('  cc-exporter completion bash >> ~/.bashrc');
+      console.log('  cconvo completion bash >> ~/.bashrc');
       console.log();
       console.log(chalk.gray('  # Zsh'));
-      console.log('  cc-exporter completion zsh > ~/.zsh/completions/_cc-exporter');
+      console.log('  cconvo completion zsh > ~/.zsh/completions/_cconvo');
       console.log();
       console.log(chalk.gray('  # Fish'));
-      console.log('  cc-exporter completion fish > ~/.config/fish/completions/cc-exporter.fish');
+      console.log('  cconvo completion fish > ~/.config/fish/completions/cconvo.fish');
       return;
     }
 

@@ -1,4 +1,4 @@
-# CC-Exporter
+# CConvo
 
 交互式 CLI 工具，用于浏览和导出 Claude Code 本地保存的对话记录。
 
@@ -28,7 +28,7 @@ pnpm link --global
 ### 交互式模式
 
 ```bash
-cc-exporter
+cconvo
 ```
 
 进入交互式界面，可以：
@@ -41,29 +41,29 @@ cc-exporter
 
 ```bash
 # 列出所有项目和对话
-cc-exporter list
+cconvo list
 
 # 按项目名筛选
-cc-exporter list --project "my-project"
+cconvo list --project "my-project"
 
 # 导出对话为 Markdown
-cc-exporter export <session-id> -o output.md
+cconvo export <session-id> -o output.md
 
 # 导出为 HTML
-cc-exporter export <session-id> --format html -o output.html
+cconvo export <session-id> --format html -o output.html
 
 # 导出为 JSON
-cc-exporter export <session-id> --format json -o output.json
+cconvo export <session-id> --format json -o output.json
 
 # 导出选项
-cc-exporter export <session-id> -o output.md \
+cconvo export <session-id> -o output.md \
   --no-thinking      # 不包含思考过程
   --no-tools         # 不包含工具调用
   --subagents        # 包含子代理对话
 
 # 查看统计信息
-cc-exporter stats
-cc-exporter stats --project "my-project"
+cconvo stats
+cconvo stats --project "my-project"
 ```
 
 ### 开发模式
@@ -100,7 +100,7 @@ pnpm dev export <id>  # 导出对话
 ## 项目结构
 
 ```
-cc-exporter/
+cconvo/
 ├── src/
 │   ├── index.ts              # 入口文件
 │   ├── cli.ts                # CLI 命令定义

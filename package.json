@@ -1,11 +1,11 @@
 {
-  "name": "@vamdawn/cc-exporter",
+  "name": "@vamdawn/cconvo",
   "version": "1.0.0",
   "description": "Interactive CLI tool to browse and export Claude Code conversations",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "cc-exporter": "./dist/index.js"
+    "cconvo": "dist/index.js"
   },
   "type": "module",
   "exports": {
@@ -36,12 +36,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Vamdawn/cc-exporter.git"
+    "url": "git+https://github.com/Vamdawn/cconvo.git"
   },
   "bugs": {
-    "url": "https://github.com/Vamdawn/cc-exporter/issues"
+    "url": "https://github.com/Vamdawn/cconvo/issues"
   },
-  "homepage": "https://github.com/Vamdawn/cc-exporter#readme",
+  "homepage": "https://github.com/Vamdawn/cconvo#readme",
   "publishConfig": {
     "access": "public"
   },

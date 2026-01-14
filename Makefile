@@ -1,4 +1,4 @@
-# cc-exporter Makefile
+# cconvo Makefile
 
 .PHONY: install build dev start clean link unlink help
 
@@ -30,7 +30,7 @@ typecheck:
 clean:
 	rm -rf dist
 
-# 全局链接（可在任意位置使用 cc-exporter 命令）
+# 全局链接（可在任意位置使用 cconvo 命令）
 link: build
 	pnpm link --global
 
@@ -43,7 +43,7 @@ all: clean install build
 
 # 帮助信息
 help:
-	@echo "cc-exporter Makefile 命令："
+	@echo "cconvo Makefile 命令："
 	@echo ""
 	@echo "  make install    - 安装依赖"
 	@echo "  make build      - 构建项目"
@@ -51,7 +51,7 @@ help:
 	@echo "  make start      - 运行构建后的版本"
 	@echo "  make typecheck  - 类型检查"
 	@echo "  make clean      - 清理构建产物"
-	@echo "  make link       - 全局安装（可在任意位置使用 cc-exporter）"
+	@echo "  make link       - 全局安装（可在任意位置使用 cconvo）"
 	@echo "  make unlink     - 取消全局安装"
 	@echo "  make all        - 完整构建流程"
 	@echo "  make help       - 显示帮助信息"
