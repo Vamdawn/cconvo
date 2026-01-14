@@ -7,6 +7,9 @@ import { exportConversation, getFileExtension } from './exporters/index.js';
 import { formatDateTime, formatSize, truncate, extractTextContent } from './utils/format.js';
 import type { Project, ConversationSummary, ExportOptions } from './models/types.js';
 
+// 导航结果类型
+type NavigationResult = 'continue' | 'back' | 'main';
+
 // 主菜单选项
 const MAIN_MENU_CHOICES = [
   { name: '📁 Browse Projects', value: 'browse' },
@@ -51,14 +54,14 @@ export async function runInteractive(): Promise<void> {
 }
 
 // 浏览项目
-async function browseProjects(): Promise<void> {
+async function browseProjects(): Promise<NavigationResult> {
   const spinner = ora('Loading projects...').start();
   const result = await scanProjects();
   spinner.stop();
 
   if (result.projects.length === 0) {
     console.log(chalk.yellow('\nNo projects found.\n'));
-    return;
+    return 'back';
   }
 
   const choices = result.projects.map(p => ({
@@ -78,18 +81,21 @@ async function browseProjects(): Promise<void> {
   ]);
 
   if (project) {
-    await browseConversations(project);
+    return await browseConversations(project);
   }
+
+  return 'back';
 }
 
 // 浏览对话
-async function browseConversations(project: Project): Promise<void> {
+async function browseConversations(project: Project): Promise<NavigationResult> {
   while (true) {
-    const choices = project.conversations.map(c => ({
+    const choices: Array<{ name: string; value: ConversationSummary | null | 'main' }> = project.conversations.map(c => ({
       name: `${formatDateTime(c.startTime)} - ${c.slug || c.sessionId.slice(0, 8)} (${c.messageCount} msgs)`,
       value: c,
     }));
-    choices.push({ name: chalk.gray('← Back'), value: null as unknown as ConversationSummary });
+    choices.push({ name: chalk.gray('← Back'), value: null });
+    choices.push({ name: chalk.cyan('🏠 Main Menu'), value: 'main' });
 
     console.log();
     console.log(chalk.bold.blue(`📁 ${project.name}`));
@@ -106,11 +112,20 @@ async function browseConversations(project: Project): Promise<void> {
       },
     ]);
 
-    if (!conversation) {
-      break;
+    if (conversation === 'main') {
+      return 'main';
     }
 
-    await showConversationActions(project, conversation);
+    if (!conversation) {
+      return 'back';
+    }
+
+    const result = await showConversationActions(project, conversation as ConversationSummary);
+    if (result === 'main') {
+      return 'main';
+    }
+    // result === 'back' 时继续循环显示对话列表
+    // result === 'continue' 时也继续循环（用于查看信息后）
   }
 }
 
@@ -118,7 +133,7 @@ async function browseConversations(project: Project): Promise<void> {
 async function showConversationActions(
   project: Project,
   conversationSummary: ConversationSummary
-): Promise<void> {
+): Promise<NavigationResult> {
   const spinner = ora('Loading conversation...').start();
   const conversation = await parseConversation(
     conversationSummary.filePath,
@@ -126,34 +141,36 @@ async function showConversationActions(
   );
   spinner.stop();
 
-  while (true) {
-    const { action } = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'action',
-        message: `Conversation: ${conversation.slug || conversation.sessionId.slice(0, 8)}`,
-        choices: [
-          { name: '👁️  Preview', value: 'preview' },
-          { name: '📤 Export', value: 'export' },
-          { name: '📋 Show Info', value: 'info' },
-          { name: chalk.gray('← Back'), value: 'back' },
-        ],
-      },
-    ]);
+  const { action } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'action',
+      message: `Conversation: ${conversation.slug || conversation.sessionId.slice(0, 8)}`,
+      choices: [
+        { name: '👁️  Preview', value: 'preview' },
+        { name: '📤 Export', value: 'export' },
+        { name: '📋 Show Info', value: 'info' },
+        { name: chalk.gray('← Back'), value: 'back' },
+        { name: chalk.cyan('🏠 Main Menu'), value: 'main' },
+      ],
+    },
+  ]);
 
-    switch (action) {
-      case 'preview':
-        await previewConversation(conversation);
-        break;
-      case 'export':
-        await exportConversationPrompt(conversation);
-        break;
-      case 'info':
-        showConversationInfo(conversation);
-        break;
-      case 'back':
-        return;
-    }
+  switch (action) {
+    case 'preview':
+      await previewConversation(conversation);
+      return 'back';
+    case 'export':
+      await exportConversationPrompt(conversation);
+      return 'back';
+    case 'info':
+      showConversationInfo(conversation);
+      return 'continue';
+    case 'main':
+      return 'main';
+    case 'back':
+    default:
+      return 'back';
   }
 }
 
@@ -295,7 +312,7 @@ function showConversationInfo(conversation: {
 }
 
 // 搜索对话
-async function searchConversations(): Promise<void> {
+async function searchConversations(): Promise<NavigationResult> {
   const { keyword } = await inquirer.prompt([
     {
       type: 'input',
@@ -305,7 +322,7 @@ async function searchConversations(): Promise<void> {
   ]);
 
   if (!keyword.trim()) {
-    return;
+    return 'back';
   }
 
   const spinner = ora('Searching...').start();
@@ -333,7 +350,7 @@ async function searchConversations(): Promise<void> {
 
   if (matches.length === 0) {
     console.log(chalk.yellow(`\nNo conversations found matching "${keyword}"\n`));
-    return;
+    return 'back';
   }
 
   console.log(chalk.green(`\nFound ${matches.length} matches:\n`));
@@ -355,8 +372,10 @@ async function searchConversations(): Promise<void> {
   ]);
 
   if (selected) {
-    await showConversationActions(selected.project, selected.conversation);
+    return await showConversationActions(selected.project, selected.conversation);
   }
+
+  return 'back';
 }
 
 // 显示统计
