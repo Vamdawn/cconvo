@@ -1,0 +1,401 @@
+import inquirer from 'inquirer';
+import chalk from 'chalk';
+import ora from 'ora';
+import { scanProjects, findConversation } from './core/scanner.js';
+import { parseConversation } from './core/parser.js';
+import { exportConversation, getFileExtension } from './exporters/index.js';
+import { formatDateTime, formatSize, truncate, extractTextContent } from './utils/format.js';
+import type { Project, ConversationSummary, ExportOptions } from './models/types.js';
+
+// 主菜单选项
+const MAIN_MENU_CHOICES = [
+  { name: '📁 Browse Projects', value: 'browse' },
+  { name: '🔍 Search Conversations', value: 'search' },
+  { name: '📊 View Statistics', value: 'stats' },
+  { name: '❌ Exit', value: 'exit' },
+];
+
+// 交互式主程序
+export async function runInteractive(): Promise<void> {
+  console.log();
+  console.log(chalk.bold.cyan('╔══════════════════════════════════════╗'));
+  console.log(chalk.bold.cyan('║     Claude Code Exporter v1.0.0      ║'));
+  console.log(chalk.bold.cyan('╚══════════════════════════════════════╝'));
+  console.log();
+
+  while (true) {
+    const { action } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'action',
+        message: 'What would you like to do?',
+        choices: MAIN_MENU_CHOICES,
+      },
+    ]);
+
+    switch (action) {
+      case 'browse':
+        await browseProjects();
+        break;
+      case 'search':
+        await searchConversations();
+        break;
+      case 'stats':
+        await showStatistics();
+        break;
+      case 'exit':
+        console.log(chalk.gray('\nGoodbye!'));
+        return;
+    }
+  }
+}
+
+// 浏览项目
+async function browseProjects(): Promise<void> {
+  const spinner = ora('Loading projects...').start();
+  const result = await scanProjects();
+  spinner.stop();
+
+  if (result.projects.length === 0) {
+    console.log(chalk.yellow('\nNo projects found.\n'));
+    return;
+  }
+
+  const choices = result.projects.map(p => ({
+    name: `${p.name} (${p.totalConversations} conversations)`,
+    value: p,
+  }));
+  choices.push({ name: chalk.gray('← Back'), value: null as unknown as Project });
+
+  const { project } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'project',
+      message: 'Select a project:',
+      choices,
+      pageSize: 15,
+    },
+  ]);
+
+  if (project) {
+    await browseConversations(project);
+  }
+}
+
+// 浏览对话
+async function browseConversations(project: Project): Promise<void> {
+  while (true) {
+    const choices = project.conversations.map(c => ({
+      name: `${formatDateTime(c.startTime)} - ${c.slug || c.sessionId.slice(0, 8)} (${c.messageCount} msgs)`,
+      value: c,
+    }));
+    choices.push({ name: chalk.gray('← Back'), value: null as unknown as ConversationSummary });
+
+    console.log();
+    console.log(chalk.bold.blue(`📁 ${project.name}`));
+    console.log(chalk.gray(`   ${project.originalPath}`));
+    console.log();
+
+    const { conversation } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'conversation',
+        message: 'Select a conversation:',
+        choices,
+        pageSize: 15,
+      },
+    ]);
+
+    if (!conversation) {
+      break;
+    }
+
+    await showConversationActions(project, conversation);
+  }
+}
+
+// 对话操作菜单
+async function showConversationActions(
+  project: Project,
+  conversationSummary: ConversationSummary
+): Promise<void> {
+  const spinner = ora('Loading conversation...').start();
+  const conversation = await parseConversation(
+    conversationSummary.filePath,
+    project.originalPath
+  );
+  spinner.stop();
+
+  while (true) {
+    const { action } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'action',
+        message: `Conversation: ${conversation.slug || conversation.sessionId.slice(0, 8)}`,
+        choices: [
+          { name: '👁️  Preview', value: 'preview' },
+          { name: '📤 Export', value: 'export' },
+          { name: '📋 Show Info', value: 'info' },
+          { name: chalk.gray('← Back'), value: 'back' },
+        ],
+      },
+    ]);
+
+    switch (action) {
+      case 'preview':
+        await previewConversation(conversation);
+        break;
+      case 'export':
+        await exportConversationPrompt(conversation);
+        break;
+      case 'info':
+        showConversationInfo(conversation);
+        break;
+      case 'back':
+        return;
+    }
+  }
+}
+
+// 预览对话
+async function previewConversation(conversation: { messages: Array<{ type: string }>, slug?: string, sessionId: string }): Promise<void> {
+  const messages = conversation.messages.filter(
+    m => m.type === 'user' || m.type === 'assistant'
+  );
+
+  console.log();
+  console.log(chalk.bold('─'.repeat(60)));
+  console.log(chalk.bold(`Preview: ${conversation.slug || conversation.sessionId.slice(0, 8)}`));
+  console.log(chalk.bold('─'.repeat(60)));
+  console.log();
+
+  // 显示前10条消息
+  const previewCount = Math.min(10, messages.length);
+  for (let i = 0; i < previewCount; i++) {
+    const msg = messages[i];
+    const role = msg.type === 'user' ? chalk.blue('User') : chalk.green('Assistant');
+    const content = truncate(extractTextContent(msg as Parameters<typeof extractTextContent>[0]), 200);
+
+    console.log(`${role}:`);
+    console.log(chalk.gray(content));
+    console.log();
+  }
+
+  if (messages.length > previewCount) {
+    console.log(chalk.gray(`... and ${messages.length - previewCount} more messages`));
+  }
+
+  console.log(chalk.bold('─'.repeat(60)));
+  console.log();
+
+  await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'continue',
+      message: 'Press Enter to continue...',
+    },
+  ]);
+}
+
+// 导出对话提示
+async function exportConversationPrompt(conversation: Parameters<typeof exportConversation>[0]): Promise<void> {
+  const { format } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'format',
+      message: 'Select export format:',
+      choices: [
+        { name: 'Markdown (.md)', value: 'markdown' },
+        { name: 'JSON (.json)', value: 'json' },
+        { name: 'HTML (.html)', value: 'html' },
+      ],
+    },
+  ]);
+
+  const { options } = await inquirer.prompt([
+    {
+      type: 'checkbox',
+      name: 'options',
+      message: 'Export options:',
+      choices: [
+        { name: 'Include thinking blocks', value: 'thinking', checked: true },
+        { name: 'Include tool calls', value: 'tools', checked: true },
+        { name: 'Include subagent conversations', value: 'subagents', checked: false },
+      ],
+    },
+  ]);
+
+  const defaultName = `${conversation.slug || conversation.sessionId}${getFileExtension(format)}`;
+  const { outputPath } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'outputPath',
+      message: 'Output file path:',
+      default: defaultName,
+    },
+  ]);
+
+  const spinner = ora('Exporting...').start();
+
+  try {
+    const exportOptions: ExportOptions = {
+      format,
+      includeThinking: options.includes('thinking'),
+      includeToolCalls: options.includes('tools'),
+      includeSubagents: options.includes('subagents'),
+      outputPath,
+    };
+
+    await exportConversation(conversation, exportOptions);
+    spinner.succeed(`Exported to ${chalk.green(outputPath)}`);
+  } catch (error) {
+    spinner.fail('Export failed');
+    console.error(chalk.red((error as Error).message));
+  }
+
+  console.log();
+}
+
+// 显示对话信息
+function showConversationInfo(conversation: {
+  slug?: string;
+  sessionId: string;
+  projectPath: string;
+  startTime: Date;
+  endTime: Date;
+  messageCount: number;
+  totalTokens: { input_tokens: number; output_tokens: number };
+  subagents: Array<{ agentId: string; messageCount: number }>;
+}): void {
+  console.log();
+  console.log(chalk.bold('─'.repeat(60)));
+  console.log(chalk.bold('Conversation Info'));
+  console.log(chalk.bold('─'.repeat(60)));
+  console.log();
+  console.log(`${chalk.gray('Slug:')}       ${conversation.slug || '-'}`);
+  console.log(`${chalk.gray('Session:')}    ${conversation.sessionId}`);
+  console.log(`${chalk.gray('Project:')}    ${conversation.projectPath}`);
+  console.log(`${chalk.gray('Start:')}      ${formatDateTime(conversation.startTime)}`);
+  console.log(`${chalk.gray('End:')}        ${formatDateTime(conversation.endTime)}`);
+  console.log(`${chalk.gray('Messages:')}   ${conversation.messageCount}`);
+  console.log(`${chalk.gray('Tokens:')}     In: ${conversation.totalTokens.input_tokens} / Out: ${conversation.totalTokens.output_tokens}`);
+  console.log(`${chalk.gray('Subagents:')}  ${conversation.subagents.length}`);
+
+  if (conversation.subagents.length > 0) {
+    console.log();
+    console.log(chalk.gray('Subagent details:'));
+    for (const sub of conversation.subagents) {
+      console.log(`  - ${sub.agentId}: ${sub.messageCount} messages`);
+    }
+  }
+
+  console.log();
+  console.log(chalk.bold('─'.repeat(60)));
+  console.log();
+}
+
+// 搜索对话
+async function searchConversations(): Promise<void> {
+  const { keyword } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'keyword',
+      message: 'Enter search keyword (project name or session ID):',
+    },
+  ]);
+
+  if (!keyword.trim()) {
+    return;
+  }
+
+  const spinner = ora('Searching...').start();
+  const result = await scanProjects();
+  spinner.stop();
+
+  // 搜索匹配的对话
+  const matches: Array<{ project: Project; conversation: ConversationSummary }> = [];
+
+  for (const project of result.projects) {
+    if (project.name.toLowerCase().includes(keyword.toLowerCase()) ||
+        project.originalPath.toLowerCase().includes(keyword.toLowerCase())) {
+      for (const conv of project.conversations) {
+        matches.push({ project, conversation: conv });
+      }
+    } else {
+      for (const conv of project.conversations) {
+        if (conv.sessionId.includes(keyword) ||
+            (conv.slug && conv.slug.toLowerCase().includes(keyword.toLowerCase()))) {
+          matches.push({ project, conversation: conv });
+        }
+      }
+    }
+  }
+
+  if (matches.length === 0) {
+    console.log(chalk.yellow(`\nNo conversations found matching "${keyword}"\n`));
+    return;
+  }
+
+  console.log(chalk.green(`\nFound ${matches.length} matches:\n`));
+
+  const choices = matches.slice(0, 30).map(m => ({
+    name: `[${m.project.name}] ${formatDateTime(m.conversation.startTime)} - ${m.conversation.slug || m.conversation.sessionId.slice(0, 8)}`,
+    value: m,
+  }));
+  choices.push({ name: chalk.gray('← Back'), value: null as unknown as { project: Project; conversation: ConversationSummary } });
+
+  const { selected } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selected',
+      message: 'Select a conversation:',
+      choices,
+      pageSize: 15,
+    },
+  ]);
+
+  if (selected) {
+    await showConversationActions(selected.project, selected.conversation);
+  }
+}
+
+// 显示统计
+async function showStatistics(): Promise<void> {
+  const spinner = ora('Calculating statistics...').start();
+  const result = await scanProjects();
+  spinner.stop();
+
+  console.log();
+  console.log(chalk.bold('─'.repeat(60)));
+  console.log(chalk.bold('📊 Statistics'));
+  console.log(chalk.bold('─'.repeat(60)));
+  console.log();
+  console.log(`${chalk.gray('Total Projects:')}       ${chalk.cyan(result.projects.length)}`);
+  console.log(`${chalk.gray('Total Conversations:')}  ${chalk.cyan(result.totalConversations)}`);
+  console.log(`${chalk.gray('Total Size:')}           ${chalk.cyan(formatSize(result.totalSize))}`);
+  console.log();
+
+  // Top 10 项目
+  console.log(chalk.bold('Top 10 Projects by Size:'));
+  console.log();
+
+  const sorted = [...result.projects].sort((a, b) => b.totalSize - a.totalSize).slice(0, 10);
+
+  for (let i = 0; i < sorted.length; i++) {
+    const p = sorted[i];
+    const bar = '█'.repeat(Math.ceil((p.totalSize / result.totalSize) * 30));
+    console.log(`  ${(i + 1).toString().padStart(2)}. ${p.name.slice(0, 25).padEnd(25)} ${formatSize(p.totalSize).padStart(10)} ${chalk.blue(bar)}`);
+  }
+
+  console.log();
+  console.log(chalk.bold('─'.repeat(60)));
+  console.log();
+
+  await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'continue',
+      message: 'Press Enter to continue...',
+    },
+  ]);
+}

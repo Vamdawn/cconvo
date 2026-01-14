@@ -1,0 +1,43 @@
+{
+  "name": "cc-exporter",
+  "version": "1.0.0",
+  "description": "Interactive CLI tool to browse and export Claude Code conversations",
+  "main": "dist/index.js",
+  "bin": {
+    "cc-exporter": "./dist/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "claude",
+    "cli",
+    "exporter",
+    "conversation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "dayjs": "^1.11.13",
+    "handlebars": "^4.7.8",
+    "inquirer": "^12.3.0",
+    "ora": "^8.1.1"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
