@@ -12,6 +12,7 @@ install:
 # 构建项目
 build:
 	pnpm build
+	chmod +x dist/index.js
 
 # 开发模式运行
 dev:
