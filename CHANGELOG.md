@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- ✨ Browse Projects 支持显示包含连字符的完整项目名
+
 ## [1.1.0] - 2025-01-15
 
 ### Added

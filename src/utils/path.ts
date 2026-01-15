@@ -21,7 +21,8 @@ export function encodePath(originalPath: string): string {
 
 // 从编码路径中提取项目名称（最后一段）
 export function getProjectName(encodedPath: string): string {
-  const parts = encodedPath.split('-').filter(Boolean);
+  const originalPath = decodePath(encodedPath);
+  const parts = originalPath.split('/').filter(Boolean);
   return parts[parts.length - 1] || encodedPath;
 }
 
