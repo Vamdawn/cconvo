@@ -9,8 +9,9 @@
 /release --patch      # 强制 patch 版本
 /release --minor      # 强制 minor 版本
 /release --major      # 强制 major 版本
-/release --publish    # 发布后推送到 npm
 ```
+
+发布到 npm 请使用 `/release:publish` 命令。
 
 ## 发布流程
 
@@ -91,20 +92,14 @@ pnpm build
 
 确保构建成功。
 
-### 10. 发布到 npm（可选）
-
-只有在用户指定 `--publish` 时执行：
-
-```bash
-pnpm publish
-```
-
-### 11. 完成提示
+### 10. 完成提示
 
 显示发布摘要：
 - 新版本号
 - Git 标签
-- 后续操作建议（如 `git push && git push --tags`）
+- 后续操作建议：
+  - `git push && git push --tags` 推送到远程
+  - `/release:publish` 发布到 npm
 
 ## 注意事项
 
