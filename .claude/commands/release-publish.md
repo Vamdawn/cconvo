@@ -5,7 +5,7 @@
 ## Usage
 
 ```
-/release:publish
+/release-publish
 ```
 
 ## 前置条件
