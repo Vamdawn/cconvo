@@ -5,7 +5,7 @@ import { scanProjects, findConversation } from './core/scanner.js';
 import { parseConversation } from './core/parser.js';
 import { exportConversation, getFileExtension } from './exporters/index.js';
 import { formatDateTime, formatSize, truncate, extractTextContent } from './utils/format.js';
-import { APP_NAME, VERSION } from './constants.js';
+import { VERSION } from './constants.js';
 import type { Project, ConversationSummary, ExportOptions } from './models/types.js';
 
 // 导航结果类型
@@ -19,16 +19,19 @@ const MAIN_MENU_CHOICES = [
   { name: '❌ Exit', value: 'exit' },
 ];
 
+// 显示欢迎 Banner
+function showBanner(): void {
+  console.log();
+  console.log(chalk.rgb(255, 157, 181)('  ╱|、') + '      ' + chalk.italic.rgb(35, 173, 229)('CCONVO') + ' ' + chalk.italic.gray(`v${VERSION}`));
+  console.log(chalk.rgb(255, 157, 181)(' (˚ˎ 。7'));
+  console.log(chalk.rgb(255, 157, 181)('  |、˜〵') + '    ' + chalk.gray('Claude Code Conversation Manager'));
+  console.log(chalk.rgb(255, 157, 181)('  じしˍ,)ノ'));
+  console.log();
+}
+
 // 交互式主程序
 export async function runInteractive(): Promise<void> {
-  console.log();
-  const title = `${APP_NAME} v${VERSION}`;
-  const padding = Math.floor((20 - title.length) / 2);
-  const paddedTitle = ' '.repeat(padding) + title + ' '.repeat(20 - title.length - padding);
-  console.log(chalk.bold.cyan('╔══════════════════════╗'));
-  console.log(chalk.bold.cyan(`║ ${paddedTitle} ║`));
-  console.log(chalk.bold.cyan('╚══════════════════════╝'));
-  console.log();
+  showBanner();
 
   while (true) {
     const { action } = await inquirer.prompt([
