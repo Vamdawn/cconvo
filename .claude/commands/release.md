@@ -101,7 +101,7 @@ pnpm build
 - Git 标签
 - 后续操作建议：
   - `git push && git push --tags` 推送到远程
-  - `/release-publish` 发布到 npm
+  - `npm publish` 发布到 npm
 
 ## 注意事项
 
