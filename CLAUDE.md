@@ -48,9 +48,50 @@
 | 🔧 | config | 配置修改 |
 | ⬆️ | deps | 依赖更新 |
 
-## CHANGELOG 更新流程
+## CHANGELOG 维护规范
 
-每次功能变更后:
-1. 在 `CHANGELOG.md` 的 `[Unreleased]` 部分添加记录
-2. 发布版本时，将内容移至新版本号下并添加日期
-3. 同时打上对应的 git 标签 (如 `v1.0.0`)
+基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和[语义化版本](https://semver.org/lang/zh-CN/)。
+
+### 核心原则
+
+- CHANGELOG 是给**人**看的，便于快速了解版本变化
+- 最新版本在最前面，按时间倒序排列
+- 每个版本包含发布日期 (YYYY-MM-DD 格式)
+
+### 变更分类
+
+按以下顺序组织，仅包含实际存在的分类：
+
+| 分类 | 说明 | 对应 Commit |
+|------|------|-------------|
+| Added | 新增功能 | ✨ feat |
+| Changed | 现有功能变更 | ♻️ refactor, ⚡️ perf |
+| Deprecated | 即将废弃的功能 | - |
+| Removed | 已移除的功能 | - |
+| Fixed | Bug 修复 | 🐛 fix |
+| Security | 安全漏洞修复 | 🔒 security |
+
+### 更新流程
+
+1. **开发时**: 每次提交后，在 `[Unreleased]` 对应分类下添加记录
+2. **发布时**:
+   - 将 `[Unreleased]` 内容移至新版本号 `[x.y.z] - YYYY-MM-DD`
+   - 创建新的空 `[Unreleased]` 章节
+   - 打 git 标签 `vx.y.z`
+
+### 格式示例
+
+```markdown
+## [Unreleased]
+
+### Added
+- ✨ 新增 XXX 功能
+
+## [1.0.0] - 2025-01-15
+
+### Added
+- ✨ 新增 YYY 功能
+
+### Fixed
+- 🐛 修复 ZZZ 问题
+```
