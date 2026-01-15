@@ -16,6 +16,7 @@
   },
   "files": [
     "dist",
+    "scripts",
     "README.md"
   ],
   "scripts": {
@@ -24,7 +25,8 @@
     "start": "node dist/index.js",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm build && pnpm typecheck"
+    "prepublishOnly": "pnpm build && pnpm typecheck",
+    "postinstall": "node scripts/postinstall.js"
   },
   "keywords": [
     "claude",

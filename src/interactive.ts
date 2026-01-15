@@ -5,6 +5,7 @@ import { scanProjects, findConversation } from './core/scanner.js';
 import { parseConversation } from './core/parser.js';
 import { exportConversation, getFileExtension } from './exporters/index.js';
 import { formatDateTime, formatSize, truncate, extractTextContent } from './utils/format.js';
+import { APP_NAME, VERSION } from './constants.js';
 import type { Project, ConversationSummary, ExportOptions } from './models/types.js';
 
 // 导航结果类型
@@ -21,9 +22,12 @@ const MAIN_MENU_CHOICES = [
 // 交互式主程序
 export async function runInteractive(): Promise<void> {
   console.log();
-  console.log(chalk.bold.cyan('╔══════════════════════════════════════╗'));
-  console.log(chalk.bold.cyan('║     Claude Code Exporter v1.0.0      ║'));
-  console.log(chalk.bold.cyan('╚══════════════════════════════════════╝'));
+  const title = `${APP_NAME} v${VERSION}`;
+  const padding = Math.floor((20 - title.length) / 2);
+  const paddedTitle = ' '.repeat(padding) + title + ' '.repeat(20 - title.length - padding);
+  console.log(chalk.bold.cyan('╔══════════════════════╗'));
+  console.log(chalk.bold.cyan(`║ ${paddedTitle} ║`));
+  console.log(chalk.bold.cyan('╚══════════════════════╝'));
   console.log();
 
   while (true) {

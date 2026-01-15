@@ -1,6 +1,6 @@
 // Shell 自动补全脚本生成器
 
-const COMMANDS = ['list', 'export', 'stats', 'completion'];
+const COMMANDS = ['list', 'export', 'stats', 'completion', 'completion:setup', 'completion:uninstall'];
 const FORMATS = ['markdown', 'json', 'html'];
 
 // Bash 补全脚本
@@ -12,7 +12,7 @@ _cconvo_completions() {
   local cur prev words cword
   _init_completion || return
 
-  local commands="list export stats completion"
+  local commands="list export stats completion completion:setup completion:uninstall"
   local formats="markdown json html"
 
   case "$prev" in
@@ -105,6 +105,8 @@ _cconvo() {
     'export:Export a conversation'
     'stats:Show conversation statistics'
     'completion:Generate shell completion script'
+    'completion\\:setup:Install shell completion'
+    'completion\\:uninstall:Remove shell completion'
   )
   formats=(markdown json html)
   shells=(bash zsh fish)
@@ -175,6 +177,8 @@ complete -c cconvo -n "__fish_use_subcommand" -a "list" -d "List all projects an
 complete -c cconvo -n "__fish_use_subcommand" -a "export" -d "Export a conversation"
 complete -c cconvo -n "__fish_use_subcommand" -a "stats" -d "Show conversation statistics"
 complete -c cconvo -n "__fish_use_subcommand" -a "completion" -d "Generate shell completion script"
+complete -c cconvo -n "__fish_use_subcommand" -a "completion:setup" -d "Install shell completion"
+complete -c cconvo -n "__fish_use_subcommand" -a "completion:uninstall" -d "Remove shell completion"
 
 # list 命令选项
 complete -c cconvo -n "__fish_seen_subcommand_from list" -s p -l project -d "Filter by project name" -xa "(cconvo list 2>/dev/null | grep '^📁' | sed 's/^📁 //')"

@@ -12,7 +12,25 @@
 
 ## 安装
 
+### npm 全局安装（推荐）
+
 ```bash
+npm install -g @vamdawn/cconvo
+```
+
+安装后启用 Shell 补全：
+
+```bash
+cconvo completion:setup
+```
+
+### 从源码安装
+
+```bash
+# 克隆仓库
+git clone https://github.com/Vamdawn/cconvo.git
+cd cconvo
+
 # 安装依赖
 pnpm install
 
@@ -105,6 +123,7 @@ cconvo/
 │   ├── index.ts              # 入口文件
 │   ├── cli.ts                # CLI 命令定义
 │   ├── interactive.ts        # 交互式界面
+│   ├── completion.ts         # Shell 补全脚本生成
 │   ├── core/
 │   │   ├── scanner.ts        # 扫描对话目录
 │   │   └── parser.ts         # 解析 JSONL 文件
@@ -116,9 +135,46 @@ cconvo/
 │   │   └── html.ts           # HTML 导出
 │   └── utils/
 │       ├── path.ts           # 路径工具
-│       └── format.ts         # 格式化工具
+│       ├── format.ts         # 格式化工具
+│       └── shell.ts          # Shell 检测和补全安装
+├── scripts/
+│   └── postinstall.js        # 安装后提示脚本
 ├── package.json
 └── tsconfig.json
+```
+
+## Shell 补全
+
+### 自动安装（推荐）
+
+```bash
+cconvo completion:setup
+```
+
+### 手动安装
+
+**Bash**
+```bash
+cconvo completion bash >> ~/.bashrc
+source ~/.bashrc
+```
+
+**Zsh**
+```bash
+cconvo completion zsh >> ~/.zshrc
+source ~/.zshrc
+```
+
+**Fish**
+```bash
+mkdir -p ~/.config/fish/completions
+cconvo completion fish > ~/.config/fish/completions/cconvo.fish
+```
+
+### 卸载补全
+
+```bash
+cconvo completion:uninstall
 ```
 
 ## 技术栈

@@ -7,15 +7,23 @@ import { parseConversation } from './core/parser.js';
 import { exportConversation, getFileExtension } from './exporters/index.js';
 import { formatDateTime, formatSize, formatTokens } from './utils/format.js';
 import { generateCompletion, getInstallInstructions } from './completion.js';
+import {
+  detectShell,
+  getShellRcFile,
+  isCompletionInstalled,
+  installCompletion,
+  uninstallCompletion,
+} from './utils/shell.js';
+import { APP_NAME, VERSION } from './constants.js';
 import type { ExportOptions } from './models/types.js';
 import type { ShellType } from './completion.js';
 
 const program = new Command();
 
 program
-  .name('cconvo')
+  .name(APP_NAME)
   .description('Interactive CLI tool to browse and export Claude Code conversations')
-  .version('1.0.0');
+  .version(VERSION);
 
 // list 命令
 program
@@ -249,6 +257,81 @@ program
 
     const completionScript = generateCompletion(shell as ShellType);
     console.log(completionScript);
+  });
+
+// completion:setup 命令
+program
+  .command('completion:setup')
+  .description('Install shell completion to your shell configuration')
+  .action(async () => {
+    const spinner = ora('Setting up shell completion...').start();
+
+    try {
+      const shell = detectShell();
+      spinner.text = `Detected shell: ${shell}`;
+
+      // 检查是否已安装
+      if (isCompletionInstalled(shell)) {
+        spinner.succeed(`Shell completion is already installed for ${shell}`);
+        return;
+      }
+
+      const { rcFile, backupFile } = installCompletion(shell);
+
+      spinner.succeed(chalk.green('Shell completion installed successfully!'));
+      console.log();
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log(`${chalk.bold('Shell:')}     ${shell}`);
+      console.log(`${chalk.bold('Config:')}   ${rcFile}`);
+      if (backupFile) {
+        console.log(`${chalk.bold('Backup:')}   ${backupFile}`);
+      }
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log();
+      console.log(chalk.yellow('Please reload your shell configuration:'));
+      console.log();
+      console.log(`  ${chalk.cyan(`source ${rcFile}`)}`);
+      console.log();
+      console.log(chalk.gray('Or restart your terminal.'));
+    } catch (error) {
+      spinner.fail('Failed to setup shell completion');
+      console.error(chalk.red((error as Error).message));
+      process.exit(1);
+    }
+  });
+
+// completion:uninstall 命令
+program
+  .command('completion:uninstall')
+  .description('Remove shell completion from your shell configuration')
+  .action(async () => {
+    const spinner = ora('Removing shell completion...').start();
+
+    try {
+      const shell = detectShell();
+      const { rcFile, removed } = uninstallCompletion(shell);
+
+      if (!removed) {
+        spinner.info('Shell completion was not installed');
+        return;
+      }
+
+      spinner.succeed(chalk.green('Shell completion removed successfully!'));
+      console.log();
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log(`${chalk.bold('Shell:')}   ${shell}`);
+      console.log(`${chalk.bold('Config:')} ${rcFile}`);
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log();
+      console.log(chalk.yellow('Please reload your shell configuration:'));
+      console.log();
+      console.log(`  ${chalk.cyan(`source ${rcFile}`)}`);
+      console.log();
+    } catch (error) {
+      spinner.fail('Failed to remove shell completion');
+      console.error(chalk.red((error as Error).message));
+      process.exit(1);
+    }
   });
 
 export { program };
