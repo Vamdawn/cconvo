@@ -48,6 +48,8 @@
 | 🔧 | config | 配置修改 |
 | ⬆️ | deps | 依赖更新 |
 
+**注意**: 当本次 commit 提交内容符合 CHANGELOG 记录要求时，需同步更新 `[Unreleased]` 部分。
+
 ## CHANGELOG 维护规范
 
 基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和[语义化版本](https://semver.org/lang/zh-CN/)。
