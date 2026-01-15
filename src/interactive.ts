@@ -360,29 +360,40 @@ async function searchConversations(): Promise<NavigationResult> {
     return 'back';
   }
 
-  console.log(chalk.green(`\nFound ${matches.length} matches:\n`));
+  while (true) {
+    console.log(chalk.green(`\nFound ${matches.length} matches:\n`));
 
-  const choices = matches.slice(0, 30).map(m => ({
-    name: `[${m.project.name}] ${formatDateTime(m.conversation.startTime)} - ${m.conversation.slug || m.conversation.sessionId.slice(0, 8)}`,
-    value: m,
-  }));
-  choices.push({ name: chalk.gray('← Back'), value: null as unknown as { project: Project; conversation: ConversationSummary } });
+    const choices: Array<{ name: string; value: { project: Project; conversation: ConversationSummary } | null | 'main' }> = matches.slice(0, 30).map(m => ({
+      name: `[${m.project.name}] ${formatDateTime(m.conversation.startTime)} - ${m.conversation.slug || m.conversation.sessionId.slice(0, 8)}`,
+      value: m,
+    }));
+    choices.push({ name: chalk.gray('← Back'), value: null });
+    choices.push({ name: chalk.cyan('🏠 Main Menu'), value: 'main' });
 
-  const { selected } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'selected',
-      message: 'Select a conversation:',
-      choices,
-      pageSize: 15,
-    },
-  ]);
+    const { selected } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'selected',
+        message: 'Select a conversation:',
+        choices,
+        pageSize: 15,
+      },
+    ]);
 
-  if (selected) {
-    return await showConversationActions(selected.project, selected.conversation);
+    if (selected === 'main') {
+      return 'main';
+    }
+
+    if (!selected) {
+      return 'back';
+    }
+
+    const result = await showConversationActions(selected.project, selected.conversation);
+    if (result === 'main') {
+      return 'main';
+    }
+    // result === 'back' 或 'continue' 时继续循环显示搜索结果
   }
-
-  return 'back';
 }
 
 // 显示统计
