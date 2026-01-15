@@ -7,6 +7,8 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-01-15
+
 ### Added
 
 - ✨ `completion:setup` 命令：一键安装 Shell 补全到配置文件

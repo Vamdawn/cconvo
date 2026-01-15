@@ -78,6 +78,8 @@ git add package.json CHANGELOG.md
 git commit -m "🔖 chore: release vX.Y.Z"
 ```
 
+**注意**: 使用固定格式，不添加 Co-Authored-By 等额外信息。
+
 ### 8. 创建 Git 标签
 
 ```bash
