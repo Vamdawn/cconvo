@@ -48,7 +48,13 @@
 | 🔧 | config | 配置修改 |
 | ⬆️ | deps | 依赖更新 |
 
-**注意**: 当本次 commit 提交内容符合 CHANGELOG 记录要求时，需同步更新 `[Unreleased]` 部分。
+### 提交前检查
+
+**重要**: 每次执行 `git commit`（包括使用 `/commit` 等 slash command）之前，必须：
+
+1. 检查本次变更是否需要记录到 CHANGELOG
+2. 如需记录，先更新 `CHANGELOG.md` 的 `[Unreleased]` 部分
+3. 将 CHANGELOG 变更与代码变更一并提交
 
 ## CHANGELOG 维护规范
 
