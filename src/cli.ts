@@ -64,7 +64,8 @@ program
 
       // 显示每个项目
       for (const project of projects) {
-        console.log(chalk.bold.blue(`📁 ${project.name}`));
+        const deletedTag = project.isDeleted ? chalk.red(' [Deleted]') : '';
+        console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag);
         console.log(chalk.gray(`   ${project.originalPath}`));
         console.log(chalk.gray(`   ${project.totalConversations} conversations, ${formatSize(project.totalSize)}`));
         console.log();

@@ -72,7 +72,9 @@ async function browseProjects(): Promise<NavigationResult> {
   }
 
   const choices = result.projects.map(p => ({
-    name: `${p.name} (${p.totalConversations} conversations)`,
+    name: p.isDeleted
+      ? `${p.name} ${chalk.red('[Deleted]')} (${p.totalConversations} conversations)`
+      : `${p.name} (${p.totalConversations} conversations)`,
     value: p,
   }));
   choices.push({ name: chalk.gray('← Back'), value: null as unknown as Project });
@@ -105,7 +107,8 @@ async function browseConversations(project: Project): Promise<NavigationResult> 
     choices.push({ name: chalk.cyan('🏠 Main Menu'), value: 'main' });
 
     console.log();
-    console.log(chalk.bold.blue(`📁 ${project.name}`));
+    const deletedTag = project.isDeleted ? chalk.red(' [Deleted]') : '';
+    console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag);
     console.log(chalk.gray(`   ${project.originalPath}`));
     console.log();
 

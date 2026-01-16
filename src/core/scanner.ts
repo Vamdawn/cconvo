@@ -2,8 +2,8 @@ import { readdir, stat } from 'fs/promises';
 import { join } from 'path';
 import {
   PROJECTS_DIR,
-  decodePath,
-  getProjectName,
+  decodePathAsync,
+  getProjectNameAsync,
   isJsonlFile,
   extractSessionId,
 } from '../utils/path.js';
@@ -97,14 +97,17 @@ export async function scanProject(dirPath: string, encodedPath: string): Promise
   // 按时间倒序排列
   conversations.sort((a, b) => b.startTime.getTime() - a.startTime.getTime());
 
+  const decodeResult = await decodePathAsync(encodedPath);
+
   return {
-    name: getProjectName(encodedPath),
+    name: await getProjectNameAsync(encodedPath),
     encodedPath,
-    originalPath: decodePath(encodedPath),
+    originalPath: decodeResult.path,
     dirPath,
     conversations,
     totalConversations: conversations.length,
     totalSize,
+    isDeleted: !decodeResult.exists,
   };
 }
 

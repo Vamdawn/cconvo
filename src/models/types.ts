@@ -153,6 +153,7 @@ export interface Project {
   conversations: ConversationSummary[];
   totalConversations: number;
   totalSize: number;
+  isDeleted: boolean; // 原始目录是否已删除
 }
 
 // 对话摘要（用于列表显示）
