@@ -1,69 +1,71 @@
-# 开发指南
+[English](./development.md) | [中文](./development.zh-CN.md)
 
-## 从源码安装
+# Development Guide
+
+## Install from Source
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone https://github.com/Vamdawn/cconvo.git
 cd cconvo
 
-# 安装依赖
+# Install dependencies
 pnpm install
 
-# 构建
+# Build
 pnpm build
 
-# 全局安装
+# Global install
 pnpm link --global
 ```
 
-## 开发模式
+## Development Mode
 
 ```bash
-pnpm dev              # 交互式模式
-pnpm dev list         # 列出对话
-pnpm dev export <id>  # 导出对话
+pnpm dev              # Interactive mode
+pnpm dev list         # List conversations
+pnpm dev export <id>  # Export conversation
 ```
 
-## 项目结构
+## Project Structure
 
 ```
 cconvo/
 ├── src/
-│   ├── index.ts              # 入口文件
-│   ├── cli.ts                # CLI 命令定义
-│   ├── interactive.ts        # 交互式界面
-│   ├── completion.ts         # Shell 补全脚本生成
+│   ├── index.ts              # Entry point
+│   ├── cli.ts                # CLI command definitions
+│   ├── interactive.ts        # Interactive interface
+│   ├── completion.ts         # Shell completion script generation
 │   ├── core/
-│   │   ├── scanner.ts        # 扫描对话目录
-│   │   └── parser.ts         # 解析 JSONL 文件
+│   │   ├── scanner.ts        # Scan conversation directories
+│   │   └── parser.ts         # Parse JSONL files
 │   ├── models/
-│   │   └── types.ts          # TypeScript 类型定义
+│   │   └── types.ts          # TypeScript type definitions
 │   ├── exporters/
-│   │   ├── markdown.ts       # Markdown 导出
-│   │   ├── json.ts           # JSON 导出
-│   │   └── html.ts           # HTML 导出
+│   │   ├── markdown.ts       # Markdown export
+│   │   ├── json.ts           # JSON export
+│   │   └── html.ts           # HTML export
 │   └── utils/
-│       ├── path.ts           # 路径工具
-│       ├── format.ts         # 格式化工具
-│       └── shell.ts          # Shell 检测和补全安装
+│       ├── path.ts           # Path utilities
+│       ├── format.ts         # Formatting utilities
+│       └── shell.ts          # Shell detection and completion install
 ├── scripts/
-│   └── postinstall.js        # 安装后提示脚本
+│   └── postinstall.js        # Post-install prompt script
 ├── package.json
 └── tsconfig.json
 ```
 
-## 技术栈
+## Tech Stack
 
 - TypeScript
-- Commander.js - CLI 框架
-- Inquirer.js - 交互式提示
-- Chalk - 终端颜色
-- Ora - 加载动画
+- Commander.js - CLI framework
+- Inquirer.js - Interactive prompts
+- Chalk - Terminal colors
+- Ora - Loading animations
 
-## Shell 补全手动安装
+## Manual Shell Completion Installation
 
-如果自动安装不适用，可以手动配置：
+If automatic installation doesn't work, you can configure manually:
 
 **Bash**
 ```bash

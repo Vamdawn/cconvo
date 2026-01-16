@@ -1,105 +1,105 @@
-# cconvo 开发规范
+# cconvo Development Guidelines
 
-## 开发环境
+## Development Environment
 
 - Node.js >= 18.0.0
 - pnpm
 
-## 代码规范
+## Code Standards
 
-### 命名规范
+### Naming Conventions
 
-| 类型 | 规范 | 示例 |
-|------|------|------|
-| 文件名 | kebab-case | `path-utils.ts` |
-| 函数 | camelCase | `scanProjects()` |
-| 常量 | UPPER_SNAKE_CASE | `PROJECTS_DIR` |
-| 类型/接口 | PascalCase | `MessageRecord` |
+| Type | Convention | Example |
+|------|------------|---------|
+| File names | kebab-case | `path-utils.ts` |
+| Functions | camelCase | `scanProjects()` |
+| Constants | UPPER_SNAKE_CASE | `PROJECTS_DIR` |
+| Types/Interfaces | PascalCase | `MessageRecord` |
 
-### TypeScript 规范
+### TypeScript Standards
 
-- 严格模式 (`strict: true`)
-- ES Module，导入使用 `.js` 后缀
-- 类型导入使用 `import type`
-- 避免使用 `any`，必要时使用 `unknown`
+- Strict mode (`strict: true`)
+- ES Module, use `.js` suffix for imports
+- Use `import type` for type imports
+- Avoid `any`, use `unknown` when necessary
 
-### 注释规范
+### Comment Standards
 
-- 使用中文注释
-- 简洁明了，放在代码上方
+- Use Chinese comments
+- Keep comments concise and place above code
 
-### 导入顺序
+### Import Order
 
-1. Node.js 内置模块
-2. 第三方库
-3. 本地模块（类型导入优先）
+1. Node.js built-in modules
+2. Third-party libraries
+3. Local modules (type imports first)
 
-## Git 提交规范
+## Git Commit Standards
 
-格式: `<emoji> <type>: <description>`
+Format: `<emoji> <type>: <description>`
 
-| Emoji | Type | 描述 |
-|-------|------|------|
-| ✨ | feat | 新功能 |
-| 🐛 | fix | Bug 修复 |
-| 📝 | docs | 文档更新 |
-| ♻️ | refactor | 代码重构 |
-| ⚡️ | perf | 性能优化 |
-| 🔧 | config | 配置修改 |
-| ⬆️ | deps | 依赖更新 |
+| Emoji | Type | Description |
+|-------|------|-------------|
+| ✨ | feat | New feature |
+| 🐛 | fix | Bug fix |
+| 📝 | docs | Documentation update |
+| ♻️ | refactor | Code refactoring |
+| ⚡️ | perf | Performance optimization |
+| 🔧 | config | Configuration change |
+| ⬆️ | deps | Dependency update |
 
-### 提交前检查
+### Pre-commit Checklist
 
-**重要**: 每次执行 `git commit`（包括使用 `/commit` 等 slash command）之前，必须：
+**Important**: Before every `git commit` (including `/commit` slash commands), you must:
 
-1. 检查本次变更是否需要记录到 CHANGELOG
-2. 如需记录，先更新 `CHANGELOG.md` 的 `[Unreleased]` 部分
-3. 将 CHANGELOG 变更与代码变更一并提交
+1. Check if changes need to be recorded in CHANGELOG
+2. If yes, update the `[Unreleased]` section in `CHANGELOG.md`
+3. Commit CHANGELOG changes together with code changes
 
-## CHANGELOG 维护规范
+## CHANGELOG Maintenance
 
-基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 和[语义化版本](https://semver.org/lang/zh-CN/)。
+Based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/).
 
-### 核心原则
+### Core Principles
 
-- CHANGELOG 是给**人**看的，便于快速了解版本变化
-- 最新版本在最前面，按时间倒序排列
-- 每个版本包含发布日期 (YYYY-MM-DD 格式)
+- CHANGELOG is for **humans**, making it easy to understand version changes
+- Latest version first, sorted in reverse chronological order
+- Each version includes release date (YYYY-MM-DD format)
 
-### 变更分类
+### Change Categories
 
-按以下顺序组织，仅包含实际存在的分类：
+Organize in the following order, only include categories that exist:
 
-| 分类 | 说明 | 对应 Commit |
-|------|------|-------------|
-| Added | 新增功能 | ✨ feat |
-| Changed | 现有功能变更 | ♻️ refactor, ⚡️ perf |
-| Deprecated | 即将废弃的功能 | - |
-| Removed | 已移除的功能 | - |
-| Fixed | Bug 修复 | 🐛 fix |
-| Security | 安全漏洞修复 | 🔒 security |
+| Category | Description | Commit Type |
+|----------|-------------|-------------|
+| Added | New features | ✨ feat |
+| Changed | Changes to existing features | ♻️ refactor, ⚡️ perf |
+| Deprecated | Features to be removed | - |
+| Removed | Removed features | - |
+| Fixed | Bug fixes | 🐛 fix |
+| Security | Security vulnerability fixes | 🔒 security |
 
-### 更新流程
+### Update Process
 
-1. **开发时**: 每次提交后，在 `[Unreleased]` 对应分类下添加记录
-2. **发布时**:
-   - 将 `[Unreleased]` 内容移至新版本号 `[x.y.z] - YYYY-MM-DD`
-   - 创建新的空 `[Unreleased]` 章节
-   - 打 git 标签 `vx.y.z`
+1. **During development**: After each commit, add record under `[Unreleased]` in appropriate category
+2. **On release**:
+   - Move `[Unreleased]` content to new version `[x.y.z] - YYYY-MM-DD`
+   - Create new empty `[Unreleased]` section
+   - Create git tag `vx.y.z`
 
-### 格式示例
+### Format Example
 
 ```markdown
 ## [Unreleased]
 
 ### Added
-- ✨ 新增 XXX 功能
+- ✨ Add XXX feature
 
 ## [1.0.0] - 2025-01-15
 
 ### Added
-- ✨ 新增 YYY 功能
+- ✨ Add YYY feature
 
 ### Fixed
-- 🐛 修复 ZZZ 问题
+- 🐛 Fix ZZZ issue
 ```
