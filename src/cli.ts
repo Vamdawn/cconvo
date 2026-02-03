@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
-import { scanProjects, findConversation } from './core/scanner.js';
+import { scanProjects, findConversation, AmbiguousSessionIdError } from './core/scanner.js';
 import { parseConversation } from './core/parser.js';
 import { exportConversation, getFileExtension } from './exporters/index.js';
 import { formatDateTime, formatSize, formatTokens } from './utils/format.js';
@@ -153,6 +153,31 @@ program
       await exportConversation(conversation, exportOptions);
       spinner.succeed(`Exported to ${chalk.green(outputPath)}`);
     } catch (error) {
+      if (error instanceof AmbiguousSessionIdError) {
+        spinner.fail(
+          `Ambiguous session ID prefix '${error.prefix}', matched ${error.matches.length} conversations:`
+        );
+        console.log();
+
+        const table = new Table({
+          style: { head: [], border: [] },
+          colWidths: [40, 25, 22],
+        });
+
+        for (const match of error.matches) {
+          table.push([
+            match.sessionId.slice(0, 36) + '...',
+            match.projectName.slice(0, 23),
+            formatDateTime(match.startTime).slice(0, 19),
+          ]);
+        }
+
+        console.log(table.toString());
+        console.log();
+        console.log(chalk.yellow('Please use a longer prefix to uniquely identify the conversation.'));
+        process.exit(1);
+      }
+
       spinner.fail('Export failed');
       console.error(chalk.red((error as Error).message));
       process.exit(1);

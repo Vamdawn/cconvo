@@ -10,6 +10,26 @@ import {
 import type { Project, ConversationSummary, ScanResult } from '../models/types.js';
 import { parseConversationMeta } from './parser.js';
 
+// session ID 前缀匹配最小长度
+const MIN_PREFIX_LENGTH = 4;
+
+/**
+ * 当 session ID 前缀匹配到多个对话时抛出
+ */
+export class AmbiguousSessionIdError extends Error {
+  constructor(
+    public readonly prefix: string,
+    public readonly matches: Array<{
+      sessionId: string;
+      projectName: string;
+      startTime: Date;
+    }>
+  ) {
+    super(`Ambiguous session ID prefix: ${prefix}`);
+    this.name = 'AmbiguousSessionIdError';
+  }
+}
+
 // 扫描所有项目
 export async function scanProjects(basePath: string = PROJECTS_DIR): Promise<ScanResult> {
   const projects: Project[] = [];
@@ -120,19 +140,49 @@ export async function findProject(name: string, basePath: string = PROJECTS_DIR)
   ) || null;
 }
 
-// 根据sessionId查找对话
+// 根据 sessionId 或前缀查找对话
 export async function findConversation(
-  sessionId: string,
+  sessionIdOrPrefix: string,
   basePath: string = PROJECTS_DIR
 ): Promise<{ project: Project; conversation: ConversationSummary } | null> {
-  const result = await scanProjects(basePath);
+  // 检查最小长度
+  if (sessionIdOrPrefix.length < MIN_PREFIX_LENGTH) {
+    throw new Error(
+      `Session ID prefix must be at least ${MIN_PREFIX_LENGTH} characters`
+    );
+  }
 
+  const result = await scanProjects(basePath);
+  const matches: Array<{
+    project: Project;
+    conversation: ConversationSummary;
+  }> = [];
+
+  // 收集所有前缀匹配的对话
   for (const project of result.projects) {
-    const conversation = project.conversations.find(c => c.sessionId === sessionId);
-    if (conversation) {
-      return { project, conversation };
+    for (const conversation of project.conversations) {
+      if (conversation.sessionId.startsWith(sessionIdOrPrefix)) {
+        matches.push({ project, conversation });
+      }
     }
   }
 
-  return null;
+  // 根据匹配数量返回结果
+  if (matches.length === 0) {
+    return null;
+  }
+
+  if (matches.length === 1) {
+    return matches[0];
+  }
+
+  // 多个匹配，抛出歧义错误
+  throw new AmbiguousSessionIdError(
+    sessionIdOrPrefix,
+    matches.map(m => ({
+      sessionId: m.conversation.sessionId,
+      projectName: m.project.name,
+      startTime: m.conversation.startTime,
+    }))
+  );
 }

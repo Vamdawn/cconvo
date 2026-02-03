@@ -7,6 +7,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- ✨ `export` 命令支持部分 session ID 前缀匹配（类似 git commit 短哈希）
+  - 最小前缀长度：4 个字符
+  - 前缀匹配多个对话时显示所有匹配项
+
 ## [1.3.0] - 2026-02-03
 
 ### Added

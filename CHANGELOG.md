@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- ✨ `export` command now supports partial session ID prefix matching (similar to git commit short hash)
+  - Minimum prefix length: 4 characters
+  - Shows all matches when prefix is ambiguous
+
 ## [1.3.0] - 2026-02-03
 
 ### Added
