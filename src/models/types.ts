@@ -182,6 +182,23 @@ export interface ExportOptions {
   includeToolCalls: boolean;
   includeSubagents: boolean;
   outputPath: string;
+  verboseTools: boolean;  // 显示完整工具 JSON（仅 markdown 格式）
+}
+
+// 对话轮次（用于 Markdown 导出）
+export interface ConversationTurn {
+  turnNumber: number;
+  timestamp: Date;
+  userInput: string;
+  assistantResponse: {
+    text: string;
+    thinkings: string[];
+    toolCalls: {
+      name: string;
+      summary: string;
+      input: Record<string, unknown>;
+    }[];
+  };
 }
 
 // 统计信息

@@ -3,7 +3,6 @@ import type {
   MessageRecord,
   UserMessage,
   AssistantMessage,
-  ContentBlock,
   TextBlock,
   ThinkingBlock,
   ToolUseBlock,
@@ -117,4 +116,74 @@ export function escapeHtml(text: string): string {
 // 转义Markdown特殊字符
 export function escapeMarkdown(text: string): string {
   return text.replace(/([\\`*_{}[\]()#+\-.!])/g, '\\$1');
+}
+
+// 根据内容生成合适的代码围栏
+export function getFenceForContent(text: string): string {
+  let maxBackticks = 0;
+  let current = 0;
+
+  for (const char of text) {
+    if (char === '`') {
+      current++;
+      maxBackticks = Math.max(maxBackticks, current);
+    } else {
+      current = 0;
+    }
+  }
+
+  // 使用比内容中最长反引号序列多一个的数量，最少 3 个
+  const fenceCount = Math.max(3, maxBackticks + 1);
+  return '`'.repeat(fenceCount);
+}
+
+// 工具调用摘要
+export interface ToolCallSummary {
+  name: string;
+  summary: string;
+  input: Record<string, unknown>;
+}
+
+// 生成工具调用摘要
+export function summarizeToolCall(tool: ToolUseBlock): ToolCallSummary {
+  const { name, input } = tool;
+  let summary = '';
+
+  switch (name) {
+    case 'Read':
+    case 'Write':
+    case 'Edit':
+      summary = (input as { file_path?: string }).file_path || '';
+      break;
+    case 'Glob':
+      summary = (input as { pattern?: string }).pattern || '';
+      break;
+    case 'Grep':
+      summary = (input as { pattern?: string }).pattern || '';
+      break;
+    case 'Bash':
+      summary = (input as { command?: string }).command || '';
+      break;
+    case 'Task':
+      const taskInput = input as { subagent_type?: string; description?: string };
+      summary = `${taskInput.subagent_type || ''}: ${taskInput.description || ''}`;
+      break;
+    case 'WebFetch':
+      summary = (input as { url?: string }).url || '';
+      break;
+    case 'WebSearch':
+      summary = (input as { query?: string }).query || '';
+      break;
+    case 'LSP':
+      const lspInput = input as { operation?: string; filePath?: string };
+      summary = `${lspInput.operation || ''} ${lspInput.filePath || ''}`;
+      break;
+    case 'NotebookEdit':
+      summary = (input as { notebook_path?: string }).notebook_path || '';
+      break;
+    default:
+      summary = truncate(JSON.stringify(input), 80);
+  }
+
+  return { name, summary, input };
 }

@@ -248,6 +248,7 @@ async function exportConversationPrompt(conversation: Parameters<typeof exportCo
         { name: 'Include thinking blocks', value: 'thinking', checked: true },
         { name: 'Include tool calls', value: 'tools', checked: true },
         { name: 'Include subagent conversations', value: 'subagents', checked: false },
+        ...(format === 'markdown' ? [{ name: 'Show full tool call JSON', value: 'verboseTools', checked: false }] : []),
       ],
     },
   ]);
@@ -271,6 +272,7 @@ async function exportConversationPrompt(conversation: Parameters<typeof exportCo
       includeToolCalls: options.includes('tools'),
       includeSubagents: options.includes('subagents'),
       outputPath,
+      verboseTools: options.includes('verboseTools'),
     };
 
     await exportConversation(conversation, exportOptions);

@@ -116,6 +116,7 @@ program
   .option('--no-thinking', 'Exclude thinking blocks')
   .option('--no-tools', 'Exclude tool calls')
   .option('--subagents', 'Include subagent conversations')
+  .option('--verbose-tools', 'Show full tool call JSON (markdown only)')
   .action(async (sessionId: string, options) => {
     const spinner = ora('Finding conversation...').start();
 
@@ -144,6 +145,7 @@ program
         includeToolCalls: options.tools !== false,
         includeSubagents: options.subagents || false,
         outputPath,
+        verboseTools: options.verboseTools || false,
       };
 
       await exportConversation(conversation, exportOptions);

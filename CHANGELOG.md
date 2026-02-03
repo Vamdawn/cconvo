@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- ✨ Improved Markdown export format: conversations are now organized by turns instead of individual messages
+- ✨ Added conversation turn count to header statistics (e.g., "42 条 (12 轮对话)")
+- ⚡️ Tool calls now display in summary mode by default (showing tool name and key parameters)
+- ⚡️ Added noise filtering for system tags (`<system-reminder>`, `<local-command-*>`, etc.)
+- ⚡️ Dynamic code fence generation to handle content containing backticks
+
+### Added
+
+- ✨ New `--verbose-tools` option to show full tool call JSON in Markdown export
+- ✨ New noise filter module for cleaning user input content
+
 ## [1.2.0] - 2026-01-16
 
 ### Added
