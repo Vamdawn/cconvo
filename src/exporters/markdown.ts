@@ -22,10 +22,12 @@ import {
   isSkillLoading,
   isSlashCommand,
 } from '../utils/noise-filter.js';
+import { t, type Language } from '../utils/i18n.js';
 
 // 导出为Markdown格式
 export function exportToMarkdown(conversation: Conversation, options: ExportOptions): string {
   const lines: string[] = [];
+  const lang = options.language || 'en';
 
   // 按轮次分组消息
   const turns = groupMessagesByTurn(conversation.messages);
@@ -37,7 +39,7 @@ export function exportToMarkdown(conversation: Conversation, options: ExportOpti
   lines.push(`> **Project**: ${conversation.projectPath}`);
   lines.push(`> **Session ID**: ${conversation.sessionId}`);
   lines.push(`> **Time**: ${formatDateTime(conversation.startTime)} - ${formatDateTime(conversation.endTime)}`);
-  lines.push(`> **Messages**: ${conversation.messageCount} 条 (${turnCount} 轮对话)`);
+  lines.push(`> **Messages**: ${conversation.messageCount} ${t('messages', lang)} (${turnCount} ${t('turns', lang)})`);
   lines.push(`> **Tokens**: Input ${formatTokens(conversation.totalTokens.input_tokens)} / Output ${formatTokens(conversation.totalTokens.output_tokens)}`);
   lines.push('');
   lines.push('---');
@@ -45,7 +47,7 @@ export function exportToMarkdown(conversation: Conversation, options: ExportOpti
 
   // 按轮次输出对话
   for (const turn of turns) {
-    lines.push(formatTurn(turn, options));
+    lines.push(formatTurn(turn, options, lang));
     lines.push('');
   }
 
@@ -62,7 +64,7 @@ export function exportToMarkdown(conversation: Conversation, options: ExportOpti
 
       const subTurns = groupMessagesByTurn(subagent.messages);
       for (const turn of subTurns) {
-        lines.push(formatTurn(turn, options));
+        lines.push(formatTurn(turn, options, lang));
         lines.push('');
       }
     }
@@ -163,31 +165,31 @@ function groupMessagesByTurn(messages: MessageRecord[]): ConversationTurn[] {
 }
 
 // 格式化单轮对话
-function formatTurn(turn: ConversationTurn, options: ExportOptions): string {
+function formatTurn(turn: ConversationTurn, options: ExportOptions, lang: Language): string {
   const lines: string[] = [];
   const timestamp = formatDateTime(turn.timestamp);
 
-  lines.push(`## 对话 ${turn.turnNumber} (${timestamp})`);
+  lines.push(`## ${t('turn', lang)} ${turn.turnNumber} (${timestamp})`);
   lines.push('');
 
   // 用户输入
-  lines.push('### 用户输入');
+  lines.push(`### ${t('userInput', lang)}`);
   lines.push('');
   if (turn.userInput) {
     lines.push(turn.userInput);
   } else {
-    lines.push('*(空)*');
+    lines.push(t('emptyInput', lang));
   }
   lines.push('');
 
   // Claude 响应
-  lines.push('### Claude 响应');
+  lines.push(`### ${t('claudeResponse', lang)}`);
   lines.push('');
 
   // 思考过程
   if (options.includeThinking && turn.assistantResponse.thinkings.length > 0) {
     lines.push('<details>');
-    lines.push('<summary>Thinking</summary>');
+    lines.push(`<summary>${t('thinking', lang)}</summary>`);
     lines.push('');
     for (const thinking of turn.assistantResponse.thinkings) {
       const fence = getFenceForContent(thinking);
@@ -206,7 +208,7 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions): string {
       // 完整 JSON 模式
       for (const tool of turn.assistantResponse.toolCalls) {
         lines.push('<details>');
-        lines.push(`<summary>Tool: ${tool.name}</summary>`);
+        lines.push(`<summary>${t('tool', lang)}: ${tool.name}</summary>`);
         lines.push('');
         lines.push('```json');
         lines.push(JSON.stringify(tool.input, null, 2));
@@ -216,7 +218,7 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions): string {
       }
     } else {
       // 摘要模式
-      lines.push('**工具调用**:');
+      lines.push(`**${t('toolCalls', lang)}**:`);
       for (const tool of turn.assistantResponse.toolCalls) {
         if (tool.summary) {
           lines.push(`- \`${tool.name}\`: ${tool.summary}`);
@@ -228,11 +230,9 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions): string {
     }
   }
 
-  // 文本内容
+  // 文本内容（不显示"无文本回复"提示）
   if (turn.assistantResponse.text) {
     lines.push(turn.assistantResponse.text);
-  } else {
-    lines.push('*(无文本回复)*');
   }
   lines.push('');
   lines.push('---');

@@ -34,6 +34,11 @@ export function formatTokens(count: number): string {
   return `${(count / 1000000).toFixed(2)}M`;
 }
 
+// 清理文本中的 thinking 标签
+function cleanThinkingTags(text: string): string {
+  return text.replace(/<thinking>[\s\S]*?<\/thinking>/g, '').trim();
+}
+
 // 提取消息文本内容
 export function extractTextContent(message: MessageRecord): string {
   if (message.type === 'user') {
@@ -53,10 +58,12 @@ export function extractTextContent(message: MessageRecord): string {
     const content = assistantMsg.message.content;
     if (!Array.isArray(content)) return '';
 
-    return content
+    const rawText = content
       .filter((block): block is TextBlock => block.type === 'text')
       .map(block => block.text)
       .join('\n');
+    // 清理可能混入 text 块的 thinking 标签
+    return cleanThinkingTags(rawText);
   }
 
   return '';

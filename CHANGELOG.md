@@ -14,11 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ⚡️ Tool calls now display in summary mode by default (showing tool name and key parameters)
 - ⚡️ Added noise filtering for system tags (`<system-reminder>`, `<local-command-*>`, etc.)
 - ⚡️ Dynamic code fence generation to handle content containing backticks
+- ⚡️ Removed "无文本回复" placeholder text for turns without text content
 
 ### Added
 
 - ✨ New `--verbose-tools` option to show full tool call JSON in Markdown export
 - ✨ New noise filter module for cleaning user input content
+- ✨ New `-l, --lang` option for language selection (en/zh), default is English
+- ✨ New i18n module for internationalization support
+
+### Fixed
+
+- 🐛 Fixed `<thinking>` tags leaking into response text in Markdown export
 
 ## [1.2.0] - 2026-01-16
 

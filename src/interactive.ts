@@ -253,6 +253,24 @@ async function exportConversationPrompt(conversation: Parameters<typeof exportCo
     },
   ]);
 
+  // 语言选择（仅 markdown 格式）
+  let language: 'en' | 'zh' = 'en';
+  if (format === 'markdown') {
+    const { lang } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'lang',
+        message: 'Output language:',
+        choices: [
+          { name: 'English', value: 'en' },
+          { name: '中文', value: 'zh' },
+        ],
+        default: 'en',
+      },
+    ]);
+    language = lang;
+  }
+
   const defaultName = `${conversation.slug || conversation.sessionId}${getFileExtension(format)}`;
   const { outputPath } = await inquirer.prompt([
     {
@@ -273,6 +291,7 @@ async function exportConversationPrompt(conversation: Parameters<typeof exportCo
       includeSubagents: options.includes('subagents'),
       outputPath,
       verboseTools: options.includes('verboseTools'),
+      language,
     };
 
     await exportConversation(conversation, exportOptions);

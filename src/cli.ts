@@ -113,6 +113,7 @@ program
   .description('Export a conversation')
   .option('-f, --format <format>', 'Export format (markdown, json, html)', 'markdown')
   .option('-o, --output <path>', 'Output file path')
+  .option('-l, --lang <code>', 'Output language (en, zh)', 'en')
   .option('--no-thinking', 'Exclude thinking blocks')
   .option('--no-tools', 'Exclude tool calls')
   .option('--subagents', 'Include subagent conversations')
@@ -146,6 +147,7 @@ program
         includeSubagents: options.subagents || false,
         outputPath,
         verboseTools: options.verboseTools || false,
+        language: options.lang === 'zh' ? 'zh' : 'en',
       };
 
       await exportConversation(conversation, exportOptions);

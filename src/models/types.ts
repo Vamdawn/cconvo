@@ -183,6 +183,7 @@ export interface ExportOptions {
   includeSubagents: boolean;
   outputPath: string;
   verboseTools: boolean;  // 显示完整工具 JSON（仅 markdown 格式）
+  language: 'en' | 'zh';  // 输出语言
 }
 
 // 对话轮次（用于 Markdown 导出）
