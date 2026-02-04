@@ -125,6 +125,13 @@ function waitForKeypress(): Promise<string> {
   });
 }
 
+// 滚动清屏（将内容推上去而非截断）
+function scrollClear(): void {
+  const rows = process.stdout.rows || 24;
+  console.log('\n'.repeat(rows));
+  process.stdout.write('\x1b[H');
+}
+
 // 渲染对话列表界面
 function renderList(
   project: Project,
@@ -132,7 +139,7 @@ function renderList(
   selectedIndex: number,
   searchTerm: string
 ): void {
-  console.clear();
+  scrollClear();
   showBanner();
 
   // 标题
