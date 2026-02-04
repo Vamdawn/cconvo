@@ -28,7 +28,7 @@ const messages: Record<Language, Record<string, string>> = {
     noMatchingConversations: 'No matching conversations',
     clearSearch: 'Clear search',
     // 快捷键提示
-    shortcuts: '[e] Export  [i] Info  [Enter] Select  [/] Search  [q] Quit  [m] Menu',
+    shortcuts: '[e] Export  [i] Info  [Enter] Select  [/] Search  [q] Quit  [m] Home',
     shortcutsSearch: '[Esc] Clear  [Enter] Select',
   },
   zh: {
@@ -57,7 +57,7 @@ const messages: Record<Language, Record<string, string>> = {
     noMatchingConversations: '没有匹配的对话',
     clearSearch: '清除搜索',
     // 快捷键提示
-    shortcuts: '[e] 导出  [i] 信息  [回车] 选择  [/] 搜索  [q] 退出  [m] 菜单',
+    shortcuts: '[e] 导出  [i] 信息  [回车] 选择  [/] 搜索  [q] 退出  [m] 首页',
     shortcutsSearch: '[Esc] 清除  [回车] 选择',
   },
 };
