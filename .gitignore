@@ -5,3 +5,6 @@ dist/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Plan files
+docs/plans/
