@@ -8,17 +8,33 @@ import { formatDateTime, formatSize, truncate, extractTextContent } from './util
 import type { Project, ConversationSummary, ExportOptions } from './models/types.js';
 import { showConversationList } from './components/conversation-list.js';
 import { showBanner } from './components/banner.js';
+import { showInteractiveList, type ListItem } from './components/interactive-list.js';
+import { t, type Language } from './utils/i18n.js';
+
+const UI_LANG: Language = 'zh';
 
 // 导航结果类型
 type NavigationResult = 'continue' | 'back' | 'main';
 
-// 主菜单选项
-const MAIN_MENU_CHOICES = [
-  { name: '📁 Browse Projects', value: 'browse' },
-  { name: '🔍 Search Conversations', value: 'search' },
-  { name: '📊 View Statistics', value: 'stats' },
-  { name: '❌ Exit', value: 'exit' },
-];
+// 显示主菜单
+async function showMainMenu(): Promise<'browse' | 'stats' | 'quit'> {
+  const menuItems: ListItem[] = [
+    { id: 'browse', label: t('browseProjects', UI_LANG), description: '' },
+    { id: 'stats', label: t('viewStatistics', UI_LANG), description: '' },
+  ];
+
+  const result = await showInteractiveList({
+    title: t('menu', UI_LANG),
+    items: menuItems,
+    showBanner: true,
+  });
+
+  if (result.action === 'quit' || result.action === 'back') {
+    return 'quit';
+  }
+
+  return result.item?.id as 'browse' | 'stats';
+}
 
 // 交互式主程序
 export async function runInteractive(): Promise<void> {
@@ -52,28 +68,18 @@ export async function runInteractive(): Promise<void> {
     spinner.stop();
   }
 
-  // 原有主菜单逻辑
+  // 主菜单循环
   while (true) {
-    const { action } = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'action',
-        message: 'What would you like to do?',
-        choices: MAIN_MENU_CHOICES,
-      },
-    ]);
+    const action = await showMainMenu();
 
     switch (action) {
       case 'browse':
         await browseProjects();
         break;
-      case 'search':
-        await searchConversations();
-        break;
       case 'stats':
         await showStatistics();
         break;
-      case 'exit':
+      case 'quit':
         console.log(chalk.gray('\nGoodbye!'));
         return;
     }
