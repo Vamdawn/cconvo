@@ -31,18 +31,22 @@ export async function runInteractive(): Promise<void> {
 
   if (currentProject && currentProject.conversations.length > 0) {
     spinner.succeed(`检测到项目: ${currentProject.name} (${currentProject.conversations.length} 个对话)`);
-    // 直接进入当前项目的对话列表
-    const result = await showConversationList(currentProject);
 
-    if (result.action === 'quit') {
-      console.log(chalk.gray('\nGoodbye!'));
-      return;
-    }
+    // 循环显示对话列表，直到用户选择退出或返回主菜单
+    while (true) {
+      const result = await showConversationList(currentProject);
 
-    if (result.action === 'main') {
-      // 继续显示主菜单
-    } else {
-      return;
+      if (result.action === 'quit') {
+        console.log(chalk.gray('\nGoodbye!'));
+        return;
+      }
+
+      if (result.action === 'main') {
+        // 跳出循环，继续显示主菜单
+        break;
+      }
+
+      // result.action === 'back' 时继续循环，返回对话列表
     }
   } else {
     spinner.stop();
