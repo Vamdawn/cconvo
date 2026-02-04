@@ -5,9 +5,9 @@ import { scanProjects, findProjectByPath } from './core/scanner.js';
 import { parseConversation } from './core/parser.js';
 import { exportConversation, getFileExtension } from './exporters/index.js';
 import { formatDateTime, formatSize, truncate, extractTextContent } from './utils/format.js';
-import { VERSION } from './constants.js';
 import type { Project, ConversationSummary, ExportOptions } from './models/types.js';
 import { showConversationList } from './components/conversation-list.js';
+import { showBanner } from './components/banner.js';
 
 // 导航结果类型
 type NavigationResult = 'continue' | 'back' | 'main';
@@ -19,16 +19,6 @@ const MAIN_MENU_CHOICES = [
   { name: '📊 View Statistics', value: 'stats' },
   { name: '❌ Exit', value: 'exit' },
 ];
-
-// 显示欢迎 Banner
-function showBanner(): void {
-  console.log();
-  console.log(chalk.rgb(255, 157, 181)('  ╱|、') + '      ' + chalk.italic.rgb(35, 173, 229)('CCONVO') + ' ' + chalk.italic.gray(`v${VERSION}`));
-  console.log(chalk.rgb(255, 157, 181)(' (˚ˎ 。7'));
-  console.log(chalk.rgb(255, 157, 181)('  |、˜〵') + '    ' + chalk.gray('Claude Code Conversation Manager'));
-  console.log(chalk.rgb(255, 157, 181)('  じしˍ,)ノ'));
-  console.log();
-}
 
 // 交互式主程序
 export async function runInteractive(): Promise<void> {

@@ -6,6 +6,7 @@ import { t, type Language } from '../utils/i18n.js';
 import { exportConversation, getFileExtension } from '../exporters/index.js';
 import { parseConversation } from '../core/parser.js';
 import type { Project, ConversationSummary, ExportOptions } from '../models/types.js';
+import { showBanner } from './banner.js';
 
 // 界面语言配置（后续可从配置文件读取）
 const UI_LANG: Language = 'zh';
@@ -132,6 +133,7 @@ function renderList(
   searchTerm: string
 ): void {
   console.clear();
+  showBanner();
 
   // 标题
   const deletedTag = project.isDeleted ? chalk.red(' [Deleted]') : '';
