@@ -120,3 +120,145 @@ function renderList(
   console.log();
   console.log(buildShortcutsHint(shortcuts, searchTerm !== ''));
 }
+
+// 主函数
+export async function showInteractiveList(config: ListConfig): Promise<ListResult> {
+  let selectedIndex = 0;
+  let searchTerm = '';
+  let filteredItems = [...config.items];
+  const shortcuts = config.shortcuts || [];
+
+  // 过滤列表
+  function filterItems(): void {
+    if (!searchTerm) {
+      filteredItems = [...config.items];
+    } else {
+      const term = searchTerm.toLowerCase();
+      filteredItems = config.items.filter(item =>
+        item.label.toLowerCase().includes(term) ||
+        (item.description && item.description.toLowerCase().includes(term))
+      );
+    }
+    selectedIndex = Math.min(selectedIndex, Math.max(0, filteredItems.length - 1));
+  }
+
+  // 设置终端
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
+  readline.emitKeypressEvents(process.stdin);
+
+  return new Promise(resolve => {
+    const cleanup = (result: ListResult) => {
+      process.stdin.removeListener('keypress', handleKeypress);
+      process.stdin.setRawMode(false);
+      resolve(result);
+    };
+
+    const handleKeypress = async (str: string | undefined, key: readline.Key) => {
+      // 搜索模式
+      if (searchTerm !== '' || key.name === 'slash' || str === '/') {
+        if (key.name === 'escape') {
+          searchTerm = '';
+          filterItems();
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          return;
+        }
+        if (key.name === 'return') {
+          if (filteredItems.length > 0) {
+            cleanup({ action: 'select', item: filteredItems[selectedIndex] });
+          }
+          return;
+        }
+        if (key.name === 'backspace') {
+          searchTerm = searchTerm.slice(0, -1);
+          filterItems();
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          return;
+        }
+        if (str && str.length === 1 && !key.ctrl && !key.meta) {
+          if (str === '/' && searchTerm === '') {
+            renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+            return;
+          }
+          searchTerm += str;
+          filterItems();
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          return;
+        }
+        return;
+      }
+
+      // 普通模式
+      switch (key.name) {
+        case 'up':
+          selectedIndex = Math.max(0, selectedIndex - 1);
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          break;
+        case 'down':
+          selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + 1);
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          break;
+        case 'return':
+          if (filteredItems.length > 0) {
+            cleanup({ action: 'select', item: filteredItems[selectedIndex] });
+          }
+          break;
+        case 'escape':
+          cleanup({ action: 'back' });
+          break;
+        default:
+          if (str) {
+            // 数字快捷键 1-9
+            if (str >= '1' && str <= '9') {
+              const idx = parseInt(str) - 1;
+              if (idx < filteredItems.length) {
+                selectedIndex = idx;
+                renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+              }
+              return;
+            }
+
+            // q 退出
+            if (str.toLowerCase() === 'q') {
+              process.stdin.pause();
+              console.clear();
+              cleanup({ action: 'quit' });
+              return;
+            }
+
+            // m 主菜单
+            if (str.toLowerCase() === 'm') {
+              console.clear();
+              cleanup({ action: 'main' });
+              return;
+            }
+
+            // 自定义快捷键
+            for (const shortcut of shortcuts) {
+              if (str === shortcut.key && filteredItems.length > 0) {
+                process.stdin.removeListener('keypress', handleKeypress);
+                process.stdin.setRawMode(false);
+
+                await shortcut.action(filteredItems[selectedIndex]);
+                await waitForKeypress();
+
+                process.stdin.setRawMode(true);
+                process.stdin.on('keypress', handleKeypress);
+                renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+                return;
+              }
+            }
+
+            // / 进入搜索
+            if (str === '/') {
+              searchTerm = '';
+              renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+            }
+          }
+      }
+    };
+
+    process.stdin.on('keypress', handleKeypress);
+    renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+  });
+}
