@@ -280,6 +280,7 @@ export async function showConversationList(
               case 'q':
                 process.stdin.removeListener('keypress', handleKeypress);
                 process.stdin.setRawMode(false);
+                process.stdin.pause();
                 console.clear();
                 resolve({ action: 'quit' });
                 return;
