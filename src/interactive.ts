@@ -142,43 +142,18 @@ async function browseProjects(): Promise<NavigationResult> {
 // 浏览对话
 async function browseConversations(project: Project): Promise<NavigationResult> {
   while (true) {
-    const choices: Array<{ name: string; value: ConversationSummary | null | 'main' }> = project.conversations.map(c => ({
-      name: `${formatDateTime(c.startTime)} - ${c.slug || c.sessionId.slice(0, 8)} (${c.messageCount} msgs)`,
-      value: c,
-    }));
-    choices.push({ name: chalk.gray('← Back'), value: null });
-    choices.push({ name: chalk.cyan('🏠 Main Menu'), value: 'main' });
+    const result = await showConversationList(project);
 
-    console.log();
-    const deletedTag = project.isDeleted ? chalk.red(' [Deleted]') : '';
-    console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag);
-    console.log(chalk.gray(`   ${project.originalPath}`));
-    console.log();
+    if (result.action === 'quit') {
+      process.exit(0);
+    }
 
-    const { conversation } = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'conversation',
-        message: 'Select a conversation:',
-        choices,
-        pageSize: 15,
-      },
-    ]);
-
-    if (conversation === 'main') {
+    if (result.action === 'main') {
       return 'main';
     }
 
-    if (!conversation) {
-      return 'back';
-    }
-
-    const result = await showConversationActions(project, conversation as ConversationSummary);
-    if (result === 'main') {
-      return 'main';
-    }
-    // result === 'back' 时继续循环显示对话列表
-    // result === 'continue' 时也继续循环（用于查看信息后）
+    // result.action === 'back' 返回项目列表
+    return 'back';
   }
 }
 
