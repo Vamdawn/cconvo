@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - ♻️ 统一所有列表页面为键盘事件驱动交互风格
 - ♻️ 抽象 InteractiveList 组件复用
+- ♻️ 统一所有 UI 字符串使用 i18n 国际化
 - ✨ 将 `[m] 菜单` 快捷键提示改为 `[m] 首页`，更清晰表达返回主界面
 - ✨ 使用滚动清屏代替直接清屏，保留终端历史上下文
 - ✨ 操作完成后返回对话列表而非退出程序
