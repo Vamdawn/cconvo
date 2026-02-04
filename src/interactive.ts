@@ -156,36 +156,34 @@ async function browseConversations(project: Project): Promise<NavigationResult> 
 
 // 显示统计
 async function showStatistics(): Promise<void> {
-  const spinner = ora('Calculating statistics...').start();
+  const spinner = ora('正在计算统计...').start();
   const result = await scanProjects();
   spinner.stop();
 
+  console.clear();
+  showBanner();
+
+  console.log(chalk.bold('  📊 统计信息'));
   console.log();
-  console.log(chalk.bold('─'.repeat(60)));
-  console.log(chalk.bold('📊 Statistics'));
-  console.log(chalk.bold('─'.repeat(60)));
-  console.log();
-  console.log(`${chalk.gray('Total Projects:')}       ${chalk.cyan(result.projects.length)}`);
-  console.log(`${chalk.gray('Total Conversations:')}  ${chalk.cyan(result.totalConversations)}`);
-  console.log(`${chalk.gray('Total Size:')}           ${chalk.cyan(formatSize(result.totalSize))}`);
+  console.log(`  ${chalk.gray('项目总数:')}       ${chalk.cyan(result.projects.length)}`);
+  console.log(`  ${chalk.gray('对话总数:')}       ${chalk.cyan(result.totalConversations)}`);
+  console.log(`  ${chalk.gray('总大小:')}         ${chalk.cyan(formatSize(result.totalSize))}`);
   console.log();
 
   // Top 10 项目
-  console.log(chalk.bold('Top 10 Projects by Size:'));
+  console.log(chalk.bold('  按大小排序 Top 10:'));
   console.log();
 
   const sorted = [...result.projects].sort((a, b) => b.totalSize - a.totalSize).slice(0, 10);
 
   for (let i = 0; i < sorted.length; i++) {
     const p = sorted[i];
-    const bar = '█'.repeat(Math.ceil((p.totalSize / result.totalSize) * 30));
-    console.log(`  ${(i + 1).toString().padStart(2)}. ${p.name.slice(0, 25).padEnd(25)} ${formatSize(p.totalSize).padStart(10)} ${chalk.blue(bar)}`);
+    const bar = '█'.repeat(Math.ceil((p.totalSize / result.totalSize) * 20));
+    console.log(`  ${(i + 1).toString().padStart(2)}. ${p.name.slice(0, 20).padEnd(20)} ${formatSize(p.totalSize).padStart(10)} ${chalk.blue(bar)}`);
   }
 
   console.log();
-  console.log(chalk.bold('─'.repeat(60)));
-  console.log();
-  console.log(chalk.gray('按任意键继续...'));
+  console.log(chalk.gray('  按任意键返回...'));
 
   await waitForAnyKey();
 }
