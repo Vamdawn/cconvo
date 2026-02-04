@@ -186,3 +186,27 @@ export async function findConversation(
     }))
   );
 }
+
+// 根据路径查找项目（用于当前目录检测）
+export async function findProjectByPath(
+  targetPath: string,
+  basePath: string = PROJECTS_DIR
+): Promise<Project | null> {
+  const result = await scanProjects(basePath);
+
+  // 规范化目标路径（去除末尾斜杠）
+  const normalizedTarget = targetPath.replace(/\/+$/, '');
+
+  for (const project of result.projects) {
+    // 规范化项目路径
+    const normalizedProject = project.originalPath.replace(/\/+$/, '');
+
+    // 精确匹配或目标路径是项目路径的子目录
+    if (normalizedTarget === normalizedProject ||
+        normalizedTarget.startsWith(normalizedProject + '/')) {
+      return project;
+    }
+  }
+
+  return null;
+}
