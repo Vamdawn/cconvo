@@ -1,12 +1,13 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import ora from 'ora';
-import { scanProjects, findConversation } from './core/scanner.js';
+import { scanProjects, findProjectByPath } from './core/scanner.js';
 import { parseConversation } from './core/parser.js';
 import { exportConversation, getFileExtension } from './exporters/index.js';
 import { formatDateTime, formatSize, truncate, extractTextContent } from './utils/format.js';
 import { VERSION } from './constants.js';
 import type { Project, ConversationSummary, ExportOptions } from './models/types.js';
+import { showConversationList } from './components/conversation-list.js';
 
 // 导航结果类型
 type NavigationResult = 'continue' | 'back' | 'main';
@@ -33,6 +34,27 @@ function showBanner(): void {
 export async function runInteractive(): Promise<void> {
   showBanner();
 
+  // 检测当前目录是否为已记录的项目
+  const cwd = process.cwd();
+  const currentProject = await findProjectByPath(cwd);
+
+  if (currentProject && currentProject.conversations.length > 0) {
+    // 直接进入当前项目的对话列表
+    const result = await showConversationList(currentProject);
+
+    if (result.action === 'quit') {
+      console.log(chalk.gray('\nGoodbye!'));
+      return;
+    }
+
+    if (result.action === 'main') {
+      // 继续显示主菜单
+    } else {
+      return;
+    }
+  }
+
+  // 原有主菜单逻辑
   while (true) {
     const { action } = await inquirer.prompt([
       {
