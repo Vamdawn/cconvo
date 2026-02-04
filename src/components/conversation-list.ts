@@ -261,6 +261,12 @@ export async function showConversationList(
             renderList(project, filteredConversations, selectedIndex, searchTerm);
           }
           break;
+        case 'escape':
+          process.stdin.removeListener('keypress', handleKeypress);
+          process.stdin.setRawMode(false);
+          console.clear();
+          resolve({ action: 'back' });
+          return;
         default:
           // 字符按键
           if (str) {
