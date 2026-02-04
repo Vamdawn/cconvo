@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✨ `export` command now supports partial session ID prefix matching (similar to git commit short hash)
   - Minimum prefix length: 4 characters
   - Shows all matches when prefix is ambiguous
+- ✨ 交互式界面自动检测当前项目，直接显示对话列表
+- ✨ 对话列表支持快捷键操作
+  - `e` 快捷导出 Markdown，`E` 选择格式导出
+  - `i` 查看对话信息
+  - `/` 搜索过滤，`Esc` 清除搜索
+  - `1-9` 快速选择，上下键导航
+  - `m` 返回主菜单，`q` 退出
+- ✨ 扩展国际化支持（中/英文界面文案）
 
 ## [1.3.0] - 2026-02-03
 
