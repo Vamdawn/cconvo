@@ -30,6 +30,14 @@ const messages: Record<Language, Record<string, string>> = {
     // 快捷键提示
     shortcuts: '[e] Export  [i] Info  [Enter] Select  [/] Search  [q] Quit  [m] Home',
     shortcutsSearch: '[Esc] Clear  [Enter] Select',
+    // 项目浏览相关
+    browseProjects: 'Browse Projects',
+    viewStatistics: 'View Statistics',
+    noProjects: 'No projects found',
+    selectProject: 'Select a project',
+    selectAction: 'Select an action',
+    conversations: 'conversations',
+    menu: 'Menu',
   },
   zh: {
     userInput: '用户输入',
@@ -59,6 +67,14 @@ const messages: Record<Language, Record<string, string>> = {
     // 快捷键提示
     shortcuts: '[e] 导出  [i] 信息  [回车] 选择  [/] 搜索  [q] 退出  [m] 首页',
     shortcutsSearch: '[Esc] 清除  [回车] 选择',
+    // 项目浏览相关
+    browseProjects: '浏览项目',
+    viewStatistics: '查看统计',
+    noProjects: '未找到项目',
+    selectProject: '选择项目',
+    selectAction: '选择操作',
+    conversations: '个对话',
+    menu: '菜单',
   },
 };
 
