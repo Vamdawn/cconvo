@@ -23,10 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- ♻️ 统一所有列表页面为键盘事件驱动交互风格
+- ♻️ 抽象 InteractiveList 组件复用
 - ✨ 将 `[m] 菜单` 快捷键提示改为 `[m] 首页`，更清晰表达返回主界面
 - ✨ 使用滚动清屏代替直接清屏，保留终端历史上下文
 - ✨ 操作完成后返回对话列表而非退出程序
 - ✨ 检测当前项目时显示加载提示
+
+### Removed
+
+- 移除独立搜索页面，改为列表内 `/` 搜索
+- 移除 inquirer 依赖
 
 ## [1.3.0] - 2026-02-03
 
