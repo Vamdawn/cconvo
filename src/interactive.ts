@@ -110,7 +110,7 @@ async function browseProjects(): Promise<NavigationResult> {
 
   const projectItems: ListItem[] = result.projects.map(p => ({
     id: p.originalPath,
-    label: p.isDeleted ? `${p.name} ${chalk.red('[Deleted]')}` : p.name,
+    label: p.isDeleted ? `${p.name} ${chalk.red(`[${t('deleted', UI_LANG)}]`)}` : p.name,
     description: `${p.totalConversations} ${t('conversations', UI_LANG)}`,
     data: p,
   }));

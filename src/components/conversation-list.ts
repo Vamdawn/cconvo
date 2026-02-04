@@ -20,11 +20,12 @@ export type ConversationListResult =
 // 格式化对话显示
 function formatConversationItem(
   index: number,
-  conv: ConversationSummary
+  conv: ConversationSummary,
+  lang: Language
 ): string {
   const time = formatDateTime(conv.startTime);
   const title = conv.slug || conv.sessionId.slice(0, 8);
-  const msgs = `${conv.messageCount} msgs`;
+  const msgs = `${conv.messageCount} ${t('msgs', lang)}`;
   return `  ${(index + 1).toString().padStart(2)}. ${time}  ${title} (${msgs})`;
 }
 
@@ -137,7 +138,7 @@ function renderList(
   showBanner();
 
   // 标题
-  const deletedTag = project.isDeleted ? chalk.red(' [Deleted]') : '';
+  const deletedTag = project.isDeleted ? chalk.red(` [${t('deleted', UI_LANG)}]`) : '';
   console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag + chalk.gray(` (${t('currentProject', UI_LANG)})`));
   console.log(chalk.bold('─'.repeat(40)));
   console.log();
@@ -153,7 +154,7 @@ function renderList(
     console.log(chalk.yellow(searchTerm ? t('noMatchingConversations', UI_LANG) : t('noConversationsFound', UI_LANG)));
   } else {
     for (let i = 0; i < conversations.length && i < 15; i++) {
-      const line = formatConversationItem(i, conversations[i]);
+      const line = formatConversationItem(i, conversations[i], UI_LANG);
       if (i === selectedIndex) {
         console.log(chalk.bgBlue.white(line));
       } else {
@@ -162,7 +163,7 @@ function renderList(
     }
 
     if (conversations.length > 15) {
-      console.log(chalk.gray(`  ... ${conversations.length - 15} more`));
+      console.log(chalk.gray(`  ... ${conversations.length - 15} ${t('more', UI_LANG)}`));
     }
   }
 

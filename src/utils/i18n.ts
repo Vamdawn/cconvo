@@ -55,6 +55,9 @@ const messages: Record<Language, Record<string, string>> = {
     totalConversations: 'Total Conversations',
     totalSize: 'Total Size',
     topProjectsBySize: 'Top 10 Projects by Size',
+    msgs: 'msgs',
+    more: 'more',
+    deleted: 'Deleted',
   },
   zh: {
     userInput: '用户输入',
@@ -109,6 +112,9 @@ const messages: Record<Language, Record<string, string>> = {
     totalConversations: '对话总数',
     totalSize: '总大小',
     topProjectsBySize: '按大小排序 Top 10',
+    msgs: '条消息',
+    more: '更多',
+    deleted: '已删除',
   },
 };
 
