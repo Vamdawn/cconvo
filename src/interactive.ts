@@ -26,9 +26,11 @@ export async function runInteractive(): Promise<void> {
 
   // 检测当前目录是否为已记录的项目
   const cwd = process.cwd();
+  const spinner = ora('正在检测当前项目...').start();
   const currentProject = await findProjectByPath(cwd);
 
   if (currentProject && currentProject.conversations.length > 0) {
+    spinner.succeed(`检测到项目: ${currentProject.name} (${currentProject.conversations.length} 个对话)`);
     // 直接进入当前项目的对话列表
     const result = await showConversationList(currentProject);
 
@@ -42,6 +44,8 @@ export async function runInteractive(): Promise<void> {
     } else {
       return;
     }
+  } else {
+    spinner.stop();
   }
 
   // 原有主菜单逻辑
