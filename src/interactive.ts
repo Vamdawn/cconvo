@@ -36,6 +36,18 @@ async function showMainMenu(): Promise<'browse' | 'stats' | 'quit'> {
   return result.item?.id as 'browse' | 'stats';
 }
 
+// 等待任意键
+async function waitForAnyKey(): Promise<void> {
+  return new Promise(resolve => {
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.once('data', () => {
+      process.stdin.setRawMode(false);
+      resolve();
+    });
+  });
+}
+
 // 交互式主程序
 export async function runInteractive(): Promise<void> {
   showBanner();
@@ -88,34 +100,39 @@ export async function runInteractive(): Promise<void> {
 
 // 浏览项目
 async function browseProjects(): Promise<NavigationResult> {
-  const spinner = ora('Loading projects...').start();
+  const spinner = ora('正在加载项目...').start();
   const result = await scanProjects();
   spinner.stop();
 
   if (result.projects.length === 0) {
-    console.log(chalk.yellow('\nNo projects found.\n'));
+    console.log(chalk.yellow(`\n${t('noProjects', UI_LANG)}\n`));
+    await waitForAnyKey();
     return 'back';
   }
 
-  const choices = result.projects.map(p => ({
-    name: p.isDeleted
-      ? `${p.name} ${chalk.red('[Deleted]')} (${p.totalConversations} conversations)`
-      : `${p.name} (${p.totalConversations} conversations)`,
-    value: p,
+  const projectItems: ListItem[] = result.projects.map(p => ({
+    id: p.originalPath,
+    label: p.isDeleted ? `${p.name} ${chalk.red('[Deleted]')}` : p.name,
+    description: `${p.totalConversations} ${t('conversations', UI_LANG)}`,
+    data: p,
   }));
-  choices.push({ name: chalk.gray('← Back'), value: null as unknown as Project });
 
-  const { project } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'project',
-      message: 'Select a project:',
-      choices,
-      pageSize: 15,
-    },
-  ]);
+  const listResult = await showInteractiveList({
+    title: t('selectProject', UI_LANG),
+    items: projectItems,
+    showBanner: true,
+  });
 
-  if (project) {
+  if (listResult.action === 'quit') {
+    process.exit(0);
+  }
+
+  if (listResult.action === 'back' || listResult.action === 'main') {
+    return listResult.action === 'main' ? 'main' : 'back';
+  }
+
+  if (listResult.action === 'select' && listResult.item) {
+    const project = listResult.item.data as Project;
     return await browseConversations(project);
   }
 
