@@ -9,7 +9,7 @@ import type { Project, ConversationSummary, ExportOptions } from '../models/type
 import { showBanner } from './banner.js';
 
 // 界面语言配置（后续可从配置文件读取）
-const UI_LANG: Language = 'zh';
+const UI_LANG: Language = 'en';
 
 // 对话列表操作结果
 export type ConversationListResult =

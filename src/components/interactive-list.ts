@@ -130,7 +130,7 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
   let searchTerm = '';
   let filteredItems = [...config.items];
   const shortcuts = config.shortcuts || [];
-  const lang = config.language || 'zh';
+  const lang = config.language || 'en';
 
   // 过滤列表
   function filterItems(): void {

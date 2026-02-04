@@ -8,7 +8,7 @@ import { showInteractiveList, type ListItem } from './components/interactive-lis
 import { t, type Language } from './utils/i18n.js';
 import { formatSize } from './utils/format.js';
 
-const UI_LANG: Language = 'zh';
+const UI_LANG: Language = 'en';
 
 // 导航结果类型
 type NavigationResult = 'continue' | 'back' | 'main';
