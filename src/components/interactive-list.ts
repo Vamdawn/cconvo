@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import readline from 'readline';
 import { showBanner } from './banner.js';
+import { t, type Language } from '../utils/i18n.js';
 
 // 列表项
 export interface ListItem {
@@ -26,6 +27,7 @@ export interface ListConfig {
   showIndex?: boolean;
   showBanner?: boolean;
   shortcuts?: ListShortcut[];
+  language?: Language;
 }
 
 // 列表结果
@@ -54,13 +56,13 @@ function waitForKeypress(): Promise<string> {
 }
 
 // 构建快捷键提示
-function buildShortcutsHint(shortcuts: ListShortcut[], isSearchMode: boolean): string {
+function buildShortcutsHint(shortcuts: ListShortcut[], isSearchMode: boolean, lang: Language): string {
   if (isSearchMode) {
-    return chalk.gray('[Esc] 清除  [回车] 选择');
+    return chalk.gray(t('listShortcutsSearch', lang));
   }
 
   const customHints = shortcuts.map(s => `[${s.key}] ${s.label}`).join('  ');
-  const baseHints = '[回车] 选择  [/] 搜索  [Esc] 返回  [q] 退出';
+  const baseHints = t('listShortcuts', lang);
 
   return chalk.gray(customHints ? `${customHints}  ${baseHints}` : baseHints);
 }
@@ -71,7 +73,8 @@ function renderList(
   items: ListItem[],
   selectedIndex: number,
   searchTerm: string,
-  shortcuts: ListShortcut[]
+  shortcuts: ListShortcut[],
+  lang: Language
 ): void {
   scrollClear();
 
@@ -86,7 +89,7 @@ function renderList(
 
   // 搜索状态
   if (searchTerm) {
-    console.log(chalk.cyan(`  搜索: ${searchTerm}_`));
+    console.log(chalk.cyan(`  ${t('searchPlaceholder', lang)}: ${searchTerm}_`));
     console.log();
   }
 
@@ -95,7 +98,7 @@ function renderList(
   const showIndex = config.showIndex !== false;
 
   if (items.length === 0) {
-    console.log(chalk.yellow(`  ${config.emptyMessage || '无数据'}`));
+    console.log(chalk.yellow(`  ${config.emptyMessage || t('noData', lang)}`));
   } else {
     for (let i = 0; i < Math.min(items.length, maxVisible); i++) {
       const item = items[i];
@@ -112,13 +115,13 @@ function renderList(
     }
 
     if (items.length > maxVisible) {
-      console.log(chalk.gray(`  ... 还有 ${items.length - maxVisible} 项`));
+      console.log(chalk.gray(`  ... ${items.length - maxVisible} ${t('moreItems', lang)}`));
     }
   }
 
   // 快捷键提示
   console.log();
-  console.log(buildShortcutsHint(shortcuts, searchTerm !== ''));
+  console.log(buildShortcutsHint(shortcuts, searchTerm !== '', lang));
 }
 
 // 主函数
@@ -127,6 +130,7 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
   let searchTerm = '';
   let filteredItems = [...config.items];
   const shortcuts = config.shortcuts || [];
+  const lang = config.language || 'zh';
 
   // 过滤列表
   function filterItems(): void {
@@ -160,7 +164,7 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
         if (key.name === 'escape') {
           searchTerm = '';
           filterItems();
-          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           return;
         }
         if (key.name === 'return') {
@@ -172,17 +176,17 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
         if (key.name === 'backspace') {
           searchTerm = searchTerm.slice(0, -1);
           filterItems();
-          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           return;
         }
         if (str && str.length === 1 && !key.ctrl && !key.meta) {
           if (str === '/' && searchTerm === '') {
-            renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+            renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
             return;
           }
           searchTerm += str;
           filterItems();
-          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           return;
         }
         return;
@@ -192,11 +196,11 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
       switch (key.name) {
         case 'up':
           selectedIndex = Math.max(0, selectedIndex - 1);
-          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           break;
         case 'down':
           selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + 1);
-          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+          renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           break;
         case 'return':
           if (filteredItems.length > 0) {
@@ -213,7 +217,7 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
               const idx = parseInt(str) - 1;
               if (idx < filteredItems.length) {
                 selectedIndex = idx;
-                renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+                renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
               }
               return;
             }
@@ -244,7 +248,7 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
 
                 process.stdin.setRawMode(true);
                 process.stdin.on('keypress', handleKeypress);
-                renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+                renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
                 return;
               }
             }
@@ -252,13 +256,13 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
             // / 进入搜索
             if (str === '/') {
               searchTerm = '';
-              renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+              renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
             }
           }
       }
     };
 
     process.stdin.on('keypress', handleKeypress);
-    renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts);
+    renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
   });
 }

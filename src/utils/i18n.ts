@@ -38,6 +38,23 @@ const messages: Record<Language, Record<string, string>> = {
     selectAction: 'Select an action',
     conversations: 'conversations',
     menu: 'Menu',
+    // 通用列表组件
+    listShortcuts: '[Enter] Select  [/] Search  [Esc] Back  [q] Quit',
+    listShortcutsSearch: '[Esc] Clear  [Enter] Select',
+    noData: 'No data',
+    moreItems: 'more items',
+    // 加载提示
+    detectingProject: 'Detecting current project...',
+    detectedProject: 'Detected project',
+    loadingProjects: 'Loading projects...',
+    calculatingStats: 'Calculating statistics...',
+    goodbye: 'Goodbye!',
+    // 统计页面
+    statistics: 'Statistics',
+    totalProjects: 'Total Projects',
+    totalConversations: 'Total Conversations',
+    totalSize: 'Total Size',
+    topProjectsBySize: 'Top 10 Projects by Size',
   },
   zh: {
     userInput: '用户输入',
@@ -75,6 +92,23 @@ const messages: Record<Language, Record<string, string>> = {
     selectAction: '选择操作',
     conversations: '个对话',
     menu: '菜单',
+    // 通用列表组件
+    listShortcuts: '[回车] 选择  [/] 搜索  [Esc] 返回  [q] 退出',
+    listShortcutsSearch: '[Esc] 清除  [回车] 选择',
+    noData: '无数据',
+    moreItems: '项',
+    // 加载提示
+    detectingProject: '正在检测当前项目...',
+    detectedProject: '检测到项目',
+    loadingProjects: '正在加载项目...',
+    calculatingStats: '正在计算统计...',
+    goodbye: '再见！',
+    // 统计页面
+    statistics: '统计信息',
+    totalProjects: '项目总数',
+    totalConversations: '对话总数',
+    totalSize: '总大小',
+    topProjectsBySize: '按大小排序 Top 10',
   },
 };
 
