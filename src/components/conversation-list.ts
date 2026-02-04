@@ -110,16 +110,10 @@ async function exportWithOptions(
 // 等待按键
 function waitForKeypress(): Promise<string> {
   return new Promise(resolve => {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
     process.stdin.setRawMode(true);
     process.stdin.resume();
     process.stdin.once('data', (data) => {
       process.stdin.setRawMode(false);
-      rl.close();
       resolve(data.toString());
     });
   });
