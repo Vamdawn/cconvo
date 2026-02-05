@@ -10,6 +10,12 @@ import {
 import type { Project, ConversationSummary, ScanResult } from '../models/types.js';
 import { parseConversationMeta } from './parser.js';
 import { parallelLimit } from '../utils/async.js';
+import {
+  loadCache,
+  saveCache,
+  getCacheEntry,
+  setCacheEntry,
+} from '../utils/cache.js';
 
 // session ID 前缀匹配最小长度
 const MIN_PREFIX_LENGTH = 4;
@@ -33,6 +39,9 @@ export class AmbiguousSessionIdError extends Error {
 
 // 扫描所有项目
 export async function scanProjects(basePath: string = PROJECTS_DIR): Promise<ScanResult> {
+  // 加载缓存
+  await loadCache();
+
   const projects: Project[] = [];
   let totalConversations = 0;
   let totalSize = 0;
@@ -66,6 +75,9 @@ export async function scanProjects(basePath: string = PROJECTS_DIR): Promise<Sca
 
   // 按项目名排序
   projects.sort((a, b) => a.name.localeCompare(b.name));
+
+  // 保存缓存
+  await saveCache();
 
   return {
     projects,
@@ -108,13 +120,37 @@ export async function scanProject(dirPath: string, encodedPath: string): Promise
         if (!sessionId) return null;
 
         const filePath = join(dirPath, entry.name);
+        const fileStat = await stat(filePath);
+        const mtime = fileStat.mtimeMs;
 
-        // 并行获取文件信息、元数据、子代理状态
-        const [fileStat, meta, hasSubagents] = await Promise.all([
-          stat(filePath),
-          parseConversationMeta(filePath),
-          checkSubagents(dirPath, sessionId),
-        ]);
+        // 尝试从缓存获取元数据
+        let meta: { slug?: string; startTime: Date; endTime: Date; messageCount: number };
+        const cached = getCacheEntry(filePath, mtime);
+
+        if (cached) {
+          // 使用缓存
+          meta = {
+            slug: cached.slug,
+            startTime: new Date(cached.startTime),
+            endTime: new Date(cached.endTime),
+            messageCount: cached.messageCount,
+          };
+        } else {
+          // 解析文件并更新缓存
+          const parsed = await parseConversationMeta(filePath);
+          meta = parsed;
+
+          setCacheEntry(filePath, {
+            mtime,
+            slug: parsed.slug,
+            startTime: parsed.startTime.toISOString(),
+            endTime: parsed.endTime.toISOString(),
+            messageCount: parsed.messageCount,
+          });
+        }
+
+        // 检查 subagents
+        const hasSubagents = await checkSubagents(dirPath, sessionId);
 
         return {
           sessionId,
