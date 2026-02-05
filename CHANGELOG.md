@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- ✨ 新增 `parallelLimit` 异步工具函数，支持带并发限制的并行执行
+
 ## [1.4.0] - 2026-02-05
 
 ### Added
