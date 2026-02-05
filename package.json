@@ -1,6 +1,6 @@
 {
   "name": "@vamdawn/cconvo",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "Interactive CLI tool to browse and export Claude Code conversations",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
