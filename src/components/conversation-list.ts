@@ -7,9 +7,12 @@ import { exportConversation, getFileExtension } from '../exporters/index.js';
 import { parseConversation } from '../core/parser.js';
 import type { Project, ConversationSummary, ExportOptions } from '../models/types.js';
 import { showBanner } from './banner.js';
+import { getLanguage } from '../utils/settings.js';
 
-// 界面语言配置（后续可从配置文件读取）
-const UI_LANG: Language = 'en';
+// 获取当前语言
+function getLang(): Language {
+  return getLanguage();
+}
 
 // 对话列表操作结果
 export type ConversationListResult =
@@ -36,14 +39,14 @@ async function showInfo(
 ): Promise<void> {
   console.log();
   console.log(chalk.bold('─'.repeat(40)));
-  console.log(chalk.bold(t('conversationInfo', UI_LANG)));
+  console.log(chalk.bold(t('conversationInfo', getLang())));
   console.log(chalk.bold('─'.repeat(40)));
-  console.log(`${chalk.gray(t('sessionId', UI_LANG) + ':')}    ${conv.sessionId}`);
-  console.log(`${chalk.gray(t('startTime', UI_LANG) + ':')}  ${formatDateTime(conv.startTime)}`);
-  console.log(`${chalk.gray(t('messageCount', UI_LANG) + ':')}  ${conv.messageCount}`);
-  console.log(`${chalk.gray(t('projectPath', UI_LANG) + ':')}  ${project.originalPath}`);
+  console.log(`${chalk.gray(t('sessionId', getLang()) + ':')}    ${conv.sessionId}`);
+  console.log(`${chalk.gray(t('startTime', getLang()) + ':')}  ${formatDateTime(conv.startTime)}`);
+  console.log(`${chalk.gray(t('messageCount', getLang()) + ':')}  ${conv.messageCount}`);
+  console.log(`${chalk.gray(t('projectPath', getLang()) + ':')}  ${project.originalPath}`);
   console.log();
-  console.log(t('pressAnyKeyToReturn', UI_LANG));
+  console.log(t('pressAnyKeyToReturn', getLang()));
 
   await waitForKeypress();
 }
@@ -63,11 +66,11 @@ async function quickExport(
     includeSubagents: false,
     outputPath,
     verboseTools: false,
-    language: UI_LANG,
+    language: getLang(),
   };
 
   await exportConversation(conversation, exportOptions);
-  console.log(chalk.green(`✓ ${t('exported', UI_LANG)}: ${outputPath}`));
+  console.log(chalk.green(`✓ ${t('exported', getLang())}: ${outputPath}`));
 
   await waitForKeypress();
 }
@@ -78,7 +81,7 @@ async function exportWithOptions(
   conv: ConversationSummary
 ): Promise<void> {
   console.log();
-  console.log(`${t('exportFormat', UI_LANG)}: [M]arkdown  [J]SON  [H]TML`);
+  console.log(`${t('exportFormat', getLang())}: [M]arkdown  [J]SON  [H]TML`);
 
   const key = await waitForKeypress();
   let format: 'markdown' | 'json' | 'html' = 'markdown';
@@ -99,11 +102,11 @@ async function exportWithOptions(
     includeSubagents: false,
     outputPath,
     verboseTools: false,
-    language: UI_LANG,
+    language: getLang(),
   };
 
   await exportConversation(conversation, exportOptions);
-  console.log(chalk.green(`✓ ${t('exported', UI_LANG)}: ${outputPath}`));
+  console.log(chalk.green(`✓ ${t('exported', getLang())}: ${outputPath}`));
 
   await waitForKeypress();
 }
@@ -138,23 +141,23 @@ function renderList(
   showBanner();
 
   // 标题
-  const deletedTag = project.isDeleted ? chalk.red(` [${t('deleted', UI_LANG)}]`) : '';
-  console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag + chalk.gray(` (${t('currentProject', UI_LANG)})`));
+  const deletedTag = project.isDeleted ? chalk.red(` [${t('deleted', getLang())}]`) : '';
+  console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag + chalk.gray(` (${t('currentProject', getLang())})`));
   console.log(chalk.bold('─'.repeat(40)));
   console.log();
 
   // 搜索栏
   if (searchTerm) {
-    console.log(chalk.cyan(`${t('searchPlaceholder', UI_LANG)}: ${searchTerm}_`));
+    console.log(chalk.cyan(`${t('searchPlaceholder', getLang())}: ${searchTerm}_`));
     console.log();
   }
 
   // 对话列表
   if (conversations.length === 0) {
-    console.log(chalk.yellow(searchTerm ? t('noMatchingConversations', UI_LANG) : t('noConversationsFound', UI_LANG)));
+    console.log(chalk.yellow(searchTerm ? t('noMatchingConversations', getLang()) : t('noConversationsFound', getLang())));
   } else {
     for (let i = 0; i < conversations.length && i < 15; i++) {
-      const line = formatConversationItem(i, conversations[i], UI_LANG);
+      const line = formatConversationItem(i, conversations[i], getLang());
       if (i === selectedIndex) {
         console.log(chalk.bgBlue.white(line));
       } else {
@@ -163,13 +166,13 @@ function renderList(
     }
 
     if (conversations.length > 15) {
-      console.log(chalk.gray(`  ... ${conversations.length - 15} ${t('more', UI_LANG)}`));
+      console.log(chalk.gray(`  ... ${conversations.length - 15} ${t('more', getLang())}`));
     }
   }
 
   // 快捷键提示
   console.log();
-  console.log(chalk.gray(searchTerm ? t('shortcutsSearch', UI_LANG) : t('shortcuts', UI_LANG)));
+  console.log(chalk.gray(searchTerm ? t('shortcutsSearch', getLang()) : t('shortcuts', getLang())));
 }
 
 // 主函数：显示对话列表
