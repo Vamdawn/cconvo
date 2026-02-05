@@ -40,14 +40,22 @@ export async function scanProjects(basePath: string = PROJECTS_DIR): Promise<Sca
   try {
     const entries = await readdir(basePath, { withFileTypes: true });
 
-    for (const entry of entries) {
-      if (entry.isDirectory()) {
-        const project = await scanProject(join(basePath, entry.name), entry.name);
-        if (project.totalConversations > 0) {
-          projects.push(project);
-          totalConversations += project.totalConversations;
-          totalSize += project.totalSize;
-        }
+    // 筛选目录
+    const directories = entries.filter(entry => entry.isDirectory());
+
+    // 并行扫描项目（限制 10 并发）
+    const projectResults = await parallelLimit(
+      directories,
+      10,
+      (entry) => scanProject(join(basePath, entry.name), entry.name)
+    );
+
+    // 过滤有效项目并统计
+    for (const project of projectResults) {
+      if (project.totalConversations > 0) {
+        projects.push(project);
+        totalConversations += project.totalConversations;
+        totalSize += project.totalSize;
       }
     }
   } catch (error) {
