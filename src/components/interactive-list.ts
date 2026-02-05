@@ -238,9 +238,7 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
             cleanup({ action: 'select', item: filteredItems[selectedIndex] });
           }
           break;
-        case 'escape':
-          cleanup({ action: 'back' });
-          break;
+        // escape 键不再用于返回，改用 b 键
         default:
           if (str) {
             // 数字快捷键 1-9
@@ -253,17 +251,21 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
               return;
             }
 
+            // b 返回
+            if (str.toLowerCase() === 'b') {
+              cleanup({ action: 'back' });
+              return;
+            }
+
             // q 退出
             if (str.toLowerCase() === 'q') {
               process.stdin.pause();
-              console.clear();
               cleanup({ action: 'quit' });
               return;
             }
 
             // h 主菜单
             if (str.toLowerCase() === 'h') {
-              console.clear();
               cleanup({ action: 'main' });
               return;
             }

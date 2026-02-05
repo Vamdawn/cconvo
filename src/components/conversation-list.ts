@@ -305,12 +305,6 @@ export async function showConversationList(
           selectedIndex = Math.min(filteredConversations.length - 1, selectedIndex + maxVisible);
           renderList(project, filteredConversations, selectedIndex, searchTerm);
           break;
-        case 'escape':
-          process.stdin.removeListener('keypress', handleKeypress);
-          process.stdin.setRawMode(false);
-          console.clear();
-          resolve({ action: 'back' });
-          return;
         default:
           // 字符按键
           if (str) {
@@ -327,17 +321,21 @@ export async function showConversationList(
             }
 
             switch (char) {
+              case 'b':
+                // 返回
+                process.stdin.removeListener('keypress', handleKeypress);
+                process.stdin.setRawMode(false);
+                resolve({ action: 'back' });
+                return;
               case 'q':
                 process.stdin.removeListener('keypress', handleKeypress);
                 process.stdin.setRawMode(false);
                 process.stdin.pause();
-                console.clear();
                 resolve({ action: 'quit' });
                 return;
               case 'h':
                 process.stdin.removeListener('keypress', handleKeypress);
                 process.stdin.setRawMode(false);
-                console.clear();
                 resolve({ action: 'main' });
                 return;
               case 'e':

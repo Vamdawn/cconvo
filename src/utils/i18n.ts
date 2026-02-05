@@ -36,7 +36,7 @@ const messages: Record<Language, Record<string, string>> = {
     firstMessage: 'First Message',
     none: '(None)',
     // 快捷键提示
-    shortcuts: '[e] Export  [Esc] Back  [h] Home  [q] Quit',
+    shortcuts: '[e] Export  [b] Back  [h] Home  [q] Quit',
     shortcutsSearch: '[Esc] Clear  [Enter] Select',
     // 项目浏览相关
     browseProjects: 'Browse Projects',
@@ -48,7 +48,7 @@ const messages: Record<Language, Record<string, string>> = {
     home: 'Home',
     menu: 'Menu',
     // 通用列表组件
-    listShortcuts: '[Enter] Select  [/] Search  [Esc] Back  [q] Quit',
+    listShortcuts: '[Enter] Select  [/] Search  [b] Back  [q] Quit',
     listShortcutsSearch: '[Esc] Clear  [Enter] Select',
     noData: 'No data',
     moreItems: 'more items',
@@ -127,7 +127,7 @@ const messages: Record<Language, Record<string, string>> = {
     firstMessage: '首条消息',
     none: '(无)',
     // 快捷键提示
-    shortcuts: '[e] 导出  [Esc] 返回  [h] 首页  [q] 退出',
+    shortcuts: '[e] 导出  [b] 返回  [h] 首页  [q] 退出',
     shortcutsSearch: '[Esc] 清除  [回车] 选择',
     // 项目浏览相关
     browseProjects: '浏览项目',
@@ -139,7 +139,7 @@ const messages: Record<Language, Record<string, string>> = {
     home: '首页',
     menu: '菜单',
     // 通用列表组件
-    listShortcuts: '[回车] 选择  [/] 搜索  [Esc] 返回  [q] 退出',
+    listShortcuts: '[回车] 选择  [/] 搜索  [b] 返回  [q] 退出',
     listShortcutsSearch: '[Esc] 清除  [回车] 选择',
     noData: '无数据',
     moreItems: '项',
