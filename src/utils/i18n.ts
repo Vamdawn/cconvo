@@ -58,6 +58,10 @@ const messages: Record<Language, Record<string, string>> = {
     msgs: 'msgs',
     more: 'more',
     deleted: 'Deleted',
+    settings: 'Settings',
+    language: 'Language',
+    selectLanguage: 'Select Language',
+    languageChanged: 'Language changed',
   },
   zh: {
     userInput: '用户输入',
@@ -115,6 +119,10 @@ const messages: Record<Language, Record<string, string>> = {
     msgs: '条消息',
     more: '更多',
     deleted: '已删除',
+    settings: '设置',
+    language: '语言',
+    selectLanguage: '选择语言',
+    languageChanged: '语言已更改',
   },
 };
 
