@@ -62,7 +62,7 @@ program
       // 显示概览
       console.log();
       console.log(chalk.bold(`${t('foundConversations', lang)} ${chalk.cyan(result.totalConversations)} ${t('conversationsIn', lang)} ${chalk.cyan(projects.length)} ${t('projects', lang)}`));
-      console.log(chalk.gray(`Total size: ${formatSize(result.totalSize)}`));
+      console.log(chalk.gray(`${t('totalSize', lang)}: ${formatSize(result.totalSize)}`));
       console.log();
 
       // 显示每个项目
@@ -70,7 +70,7 @@ program
         const deletedTag = project.isDeleted ? chalk.red(` [${t('deleted', lang)}]`) : '';
         console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag);
         console.log(chalk.gray(`   ${project.originalPath}`));
-        console.log(chalk.gray(`   ${project.totalConversations} conversations, ${formatSize(project.totalSize)}`));
+        console.log(chalk.gray(`   ${project.totalConversations} ${t('conversations', lang)}, ${formatSize(project.totalSize)}`));
         console.log();
 
         // 显示对话列表
@@ -210,7 +210,7 @@ program
       }
 
       console.log();
-      console.log(chalk.bold('📊 Statistics'));
+      console.log(chalk.bold(`📊 ${t('statistics', lang)}`));
       console.log();
 
       // 总体统计
@@ -218,9 +218,9 @@ program
       const totalSize = projects.reduce((sum, p) => sum + p.totalSize, 0);
 
       console.log(chalk.gray('─'.repeat(50)));
-      console.log(`${chalk.bold('Projects:')}        ${chalk.cyan(projects.length)}`);
-      console.log(`${chalk.bold('Conversations:')}   ${chalk.cyan(totalConversations)}`);
-      console.log(`${chalk.bold('Total Size:')}      ${chalk.cyan(formatSize(totalSize))}`);
+      console.log(`${chalk.bold(t('totalProjects', lang) + ':')}        ${chalk.cyan(projects.length)}`);
+      console.log(`${chalk.bold(t('totalConversations', lang) + ':')}   ${chalk.cyan(totalConversations)}`);
+      console.log(`${chalk.bold(t('totalSize', lang) + ':')}      ${chalk.cyan(formatSize(totalSize))}`);
       console.log(chalk.gray('─'.repeat(50)));
       console.log();
 
