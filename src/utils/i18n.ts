@@ -12,6 +12,7 @@ const messages: Record<Language, Record<string, string>> = {
     turns: 'turns',
     thinking: 'Thinking',
     tool: 'Tool',
+    noOutput: '*(No output)*',
     // 新增：交互式界面文案
     currentProject: 'Current Project',
     selectConversation: 'Select a conversation',
@@ -94,6 +95,7 @@ const messages: Record<Language, Record<string, string>> = {
     turns: '轮对话',
     thinking: '思考过程',
     tool: '工具',
+    noOutput: '*(无输出)*',
     // 新增：交互式界面文案
     currentProject: '当前项目',
     selectConversation: '选择对话',

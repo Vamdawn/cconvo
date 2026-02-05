@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- ✨ Improve Markdown export formatting
+  - Wrap user input and Claude response in code fences
+  - Wrap Tool Calls in collapsible `<details>` block
+  - Show "No output" hint when response is completely empty (i18n supported)
+
 ## [1.5.0] - 2026-02-05
 
 ### Added

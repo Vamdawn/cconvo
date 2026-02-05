@@ -176,7 +176,10 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions, lang: Langua
   lines.push(`### ${t('userInput', lang)}`);
   lines.push('');
   if (turn.userInput) {
+    const userFence = getFenceForContent(turn.userInput);
+    lines.push(userFence);
     lines.push(turn.userInput);
+    lines.push(userFence);
   } else {
     lines.push(t('emptyInput', lang));
   }
@@ -218,7 +221,9 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions, lang: Langua
       }
     } else {
       // 摘要模式
-      lines.push(`**${t('toolCalls', lang)}**:`);
+      lines.push('<details>');
+      lines.push(`<summary>${t('toolCalls', lang)}</summary>`);
+      lines.push('');
       for (const tool of turn.assistantResponse.toolCalls) {
         if (tool.summary) {
           lines.push(`- \`${tool.name}\`: ${tool.summary}`);
@@ -227,13 +232,27 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions, lang: Langua
         }
       }
       lines.push('');
+      lines.push('</details>');
+      lines.push('');
     }
   }
 
-  // 文本内容（不显示"无文本回复"提示）
+  // 文本内容
   if (turn.assistantResponse.text) {
+    const responseFence = getFenceForContent(turn.assistantResponse.text);
+    lines.push(responseFence);
     lines.push(turn.assistantResponse.text);
+    lines.push(responseFence);
   }
+
+  // 如果完全没有输出（无 thinking、tool calls、text），显示提示
+  const hasThinking = options.includeThinking && turn.assistantResponse.thinkings.length > 0;
+  const hasToolCalls = options.includeToolCalls && turn.assistantResponse.toolCalls.length > 0;
+  const hasText = !!turn.assistantResponse.text;
+  if (!hasThinking && !hasToolCalls && !hasText) {
+    lines.push(t('noOutput', lang));
+  }
+
   lines.push('');
   lines.push('---');
 
