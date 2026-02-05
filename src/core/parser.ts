@@ -10,6 +10,7 @@ import type {
   UserMessage,
   AssistantMessage,
 } from '../models/types.js';
+import { cleanUserInput, isRealUserInput, extractUserText } from '../utils/noise-filter.js';
 
 // 对话元数据
 interface ConversationMeta {
@@ -65,20 +66,14 @@ export async function parseConversationMeta(filePath: string): Promise<Conversat
           slug = userMsg.slug;
         }
 
-        // 提取第一条用户消息
-        if (!firstUserMessage) {
-          const content = userMsg.message.content;
-          if (typeof content === 'string') {
-            firstUserMessage = content;
-          } else {
-            const textBlock = content.find(b => b.type === 'text');
-            if (textBlock && 'text' in textBlock) {
-              firstUserMessage = textBlock.text;
-            }
-          }
-          // 截断至 100 字符
-          if (firstUserMessage && firstUserMessage.length > 100) {
-            firstUserMessage = firstUserMessage.slice(0, 100) + '...';
+        // 提取第一条真正的用户消息（过滤噪音和工具结果）
+        if (!firstUserMessage && isRealUserInput(userMsg)) {
+          const rawText = extractUserText(userMsg);
+          const cleaned = cleanUserInput(rawText);
+          if (cleaned) {
+            firstUserMessage = cleaned.length > 100
+              ? cleaned.slice(0, 100) + '...'
+              : cleaned;
           }
         }
       }

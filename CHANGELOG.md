@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Show duration, file size, token usage (input/output), and first user message preview
   - Cache new metadata fields (totalTokens, firstUserMessage) for faster loading
   - Dynamic list height calculation based on terminal size
+  - Clean noise from first message preview (filter command tags, system reminders)
 
 ## [1.5.1] - 2026-02-05
 
