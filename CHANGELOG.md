@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- ✨ Add `release` skill for automated version release workflow
+  - Analyze git commits to infer semantic version (major/minor/patch)
+  - Auto-generate bilingual CHANGELOG (English/Chinese)
+  - Interactive preview before execution
+  - Create git commit and tag
+
 ## [1.5.1] - 2026-02-05
 
 ### Changed

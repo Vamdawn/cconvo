@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- ✨ 新增 `release` 技能用于自动化版本发布流程
+  - 分析 git commit 推断语义化版本号（major/minor/patch）
+  - 自动生成双语 CHANGELOG（中文/英文）
+  - 执行前交互式预览确认
+  - 创建 git commit 和 tag
+
 ## [1.5.1] - 2026-02-05
 
 ### Changed
