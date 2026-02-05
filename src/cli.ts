@@ -15,6 +15,8 @@ import {
   uninstallCompletion,
 } from './utils/shell.js';
 import { APP_NAME, VERSION } from './constants.js';
+import { t } from './utils/i18n.js';
+import { getLanguage } from './utils/settings.js';
 import type { ExportOptions } from './models/types.js';
 import type { ShellType } from './completion.js';
 
@@ -31,14 +33,15 @@ program
   .description('List all projects and conversations')
   .option('-p, --project <name>', 'Filter by project name')
   .action(async (options) => {
-    const spinner = ora('Scanning conversations...').start();
+    const lang = getLanguage();
+    const spinner = ora(t('scanningConversations', lang)).start();
 
     try {
       const result = await scanProjects();
       spinner.stop();
 
       if (result.projects.length === 0) {
-        console.log(chalk.yellow('No conversations found.'));
+        console.log(chalk.yellow(t('noConversationsFound', lang)));
         return;
       }
 
@@ -52,19 +55,19 @@ program
       }
 
       if (projects.length === 0) {
-        console.log(chalk.yellow(`No projects matching "${options.project}"`));
+        console.log(chalk.yellow(`${t('noProjectsMatching', lang)} "${options.project}"`));
         return;
       }
 
       // 显示概览
       console.log();
-      console.log(chalk.bold(`Found ${chalk.cyan(result.totalConversations)} conversations in ${chalk.cyan(projects.length)} projects`));
+      console.log(chalk.bold(`${t('foundConversations', lang)} ${chalk.cyan(result.totalConversations)} ${t('conversationsIn', lang)} ${chalk.cyan(projects.length)} ${t('projects', lang)}`));
       console.log(chalk.gray(`Total size: ${formatSize(result.totalSize)}`));
       console.log();
 
       // 显示每个项目
       for (const project of projects) {
-        const deletedTag = project.isDeleted ? chalk.red(' [Deleted]') : '';
+        const deletedTag = project.isDeleted ? chalk.red(` [${t('deleted', lang)}]`) : '';
         console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag);
         console.log(chalk.gray(`   ${project.originalPath}`));
         console.log(chalk.gray(`   ${project.totalConversations} conversations, ${formatSize(project.totalSize)}`));
@@ -96,12 +99,12 @@ program
         console.log(table.toString());
 
         if (project.conversations.length > 10) {
-          console.log(chalk.gray(`   ... and ${project.conversations.length - 10} more conversations`));
+          console.log(chalk.gray(`   ... ${t('andMore', lang)} ${project.conversations.length - 10} ${t('moreConversations', lang)}`));
         }
         console.log();
       }
     } catch (error) {
-      spinner.fail('Failed to scan conversations');
+      spinner.fail(t('failedToScan', lang));
       console.error(chalk.red((error as Error).message));
       process.exit(1);
     }
@@ -119,23 +122,24 @@ program
   .option('--subagents', 'Include subagent conversations')
   .option('--verbose-tools', 'Show full tool call JSON (markdown only)')
   .action(async (sessionId: string, options) => {
-    const spinner = ora('Finding conversation...').start();
+    const lang = getLanguage();
+    const spinner = ora(t('findingConversation', lang)).start();
 
     try {
       const found = await findConversation(sessionId);
 
       if (!found) {
-        spinner.fail(`Conversation not found: ${sessionId}`);
+        spinner.fail(`${t('conversationNotFound', lang)}: ${sessionId}`);
         process.exit(1);
       }
 
-      spinner.text = 'Parsing conversation...';
+      spinner.text = t('parsingConversation', lang);
       const conversation = await parseConversation(
         found.conversation.filePath,
         found.project.originalPath
       );
 
-      spinner.text = 'Exporting...';
+      spinner.text = t('exporting', lang);
 
       const outputPath = options.output ||
         `${conversation.slug || conversation.sessionId}${getFileExtension(options.format)}`;
@@ -151,11 +155,11 @@ program
       };
 
       await exportConversation(conversation, exportOptions);
-      spinner.succeed(`Exported to ${chalk.green(outputPath)}`);
+      spinner.succeed(`${t('exportedTo', lang)} ${chalk.green(outputPath)}`);
     } catch (error) {
       if (error instanceof AmbiguousSessionIdError) {
         spinner.fail(
-          `Ambiguous session ID prefix '${error.prefix}', matched ${error.matches.length} conversations:`
+          `${t('ambiguousSessionId', lang)} '${error.prefix}', ${t('matched', lang)} ${error.matches.length} conversations:`
         );
         console.log();
 
@@ -174,11 +178,11 @@ program
 
         console.log(table.toString());
         console.log();
-        console.log(chalk.yellow('Please use a longer prefix to uniquely identify the conversation.'));
+        console.log(chalk.yellow(t('useLongerPrefix', lang)));
         process.exit(1);
       }
 
-      spinner.fail('Export failed');
+      spinner.fail(t('exportFailed', lang));
       console.error(chalk.red((error as Error).message));
       process.exit(1);
     }
@@ -190,7 +194,8 @@ program
   .description('Show conversation statistics')
   .option('-p, --project <name>', 'Filter by project name')
   .action(async (options) => {
-    const spinner = ora('Calculating statistics...').start();
+    const lang = getLanguage();
+    const spinner = ora(t('calculatingStats', lang)).start();
 
     try {
       const result = await scanProjects();
@@ -241,10 +246,10 @@ program
       console.log(table.toString());
 
       if (projects.length > 20) {
-        console.log(chalk.gray(`\n... and ${projects.length - 20} more projects`));
+        console.log(chalk.gray(`\n... ${t('andMore', lang)} ${projects.length - 20} ${t('moreProjects', lang)}`));
       }
     } catch (error) {
-      spinner.fail('Failed to calculate statistics');
+      spinner.fail(t('failedToCalculate', lang));
       console.error(chalk.red((error as Error).message));
       process.exit(1);
     }
