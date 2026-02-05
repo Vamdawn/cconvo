@@ -9,6 +9,7 @@ import {
 } from '../utils/path.js';
 import type { Project, ConversationSummary, ScanResult } from '../models/types.js';
 import { parseConversationMeta } from './parser.js';
+import { parallelLimit } from '../utils/async.js';
 
 // session ID 前缀匹配最小长度
 const MIN_PREFIX_LENGTH = 4;
@@ -65,6 +66,17 @@ export async function scanProjects(basePath: string = PROJECTS_DIR): Promise<Sca
   };
 }
 
+// 检查是否有 subagents 目录
+async function checkSubagents(dirPath: string, sessionId: string): Promise<boolean> {
+  const subagentsDir = join(dirPath, sessionId, 'subagents');
+  try {
+    await stat(subagentsDir);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // 扫描单个项目
 export async function scanProject(dirPath: string, encodedPath: string): Promise<Project> {
   const conversations: ConversationSummary[] = [];
@@ -73,39 +85,47 @@ export async function scanProject(dirPath: string, encodedPath: string): Promise
   try {
     const entries = await readdir(dirPath, { withFileTypes: true });
 
-    for (const entry of entries) {
-      if (entry.isFile() && isJsonlFile(entry.name)) {
+    // 筛选 jsonl 文件
+    const jsonlEntries = entries.filter(
+      (entry): entry is typeof entry & { name: string } =>
+        entry.isFile() && isJsonlFile(entry.name)
+    );
+
+    // 并行处理对话文件（限制 20 并发）
+    const conversationResults = await parallelLimit(
+      jsonlEntries,
+      20,
+      async (entry) => {
         const sessionId = extractSessionId(entry.name);
-        if (sessionId) {
-          const filePath = join(dirPath, entry.name);
-          const fileStat = await stat(filePath);
+        if (!sessionId) return null;
 
-          // 检查是否有subagents目录
-          const subagentsDir = join(dirPath, sessionId, 'subagents');
-          let hasSubagents = false;
-          try {
-            await stat(subagentsDir);
-            hasSubagents = true;
-          } catch {
-            // 没有subagents目录
-          }
+        const filePath = join(dirPath, entry.name);
 
-          // 解析对话元数据
-          const meta = await parseConversationMeta(filePath);
+        // 并行获取文件信息、元数据、子代理状态
+        const [fileStat, meta, hasSubagents] = await Promise.all([
+          stat(filePath),
+          parseConversationMeta(filePath),
+          checkSubagents(dirPath, sessionId),
+        ]);
 
-          conversations.push({
-            sessionId,
-            slug: meta.slug,
-            filePath,
-            startTime: meta.startTime,
-            endTime: meta.endTime,
-            messageCount: meta.messageCount,
-            fileSize: fileStat.size,
-            hasSubagents,
-          });
+        return {
+          sessionId,
+          slug: meta.slug,
+          filePath,
+          startTime: meta.startTime,
+          endTime: meta.endTime,
+          messageCount: meta.messageCount,
+          fileSize: fileStat.size,
+          hasSubagents,
+        } as ConversationSummary;
+      }
+    );
 
-          totalSize += fileStat.size;
-        }
+    // 过滤无效结果并计算总大小
+    for (const conv of conversationResults) {
+      if (conv) {
+        conversations.push(conv);
+        totalSize += conv.fileSize;
       }
     }
   } catch (error) {
