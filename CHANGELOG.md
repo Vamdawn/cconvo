@@ -7,15 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- 🐛 修复列表超过 15 项时无法滚动查看后续项目的问题
+## [1.4.0] - 2026-02-05
 
 ### Added
 
-- ✨ `export` command now supports partial session ID prefix matching (similar to git commit short hash)
-  - Minimum prefix length: 4 characters
-  - Shows all matches when prefix is ambiguous
+- ✨ `export` 命令支持部分会话 ID 前缀匹配（类似 git commit 短哈希）
+  - 最小前缀长度：4 字符
+  - 前缀不明确时显示所有匹配项
 - ✨ 交互式界面自动检测当前项目，直接显示对话列表
 - ✨ 对话列表支持快捷键操作
   - `e` 快捷导出 Markdown，`E` 选择格式导出
@@ -42,6 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 移除独立搜索页面，改为列表内 `/` 搜索
 - 移除 inquirer 依赖
+
+### Fixed
+
+- 🐛 修复列表超过 15 项时无法滚动查看后续项目的问题
 
 ## [1.3.0] - 2026-02-03
 
