@@ -100,7 +100,19 @@ function renderList(
   if (items.length === 0) {
     console.log(chalk.yellow(`  ${config.emptyMessage || t('noData', lang)}`));
   } else {
-    for (let i = 0; i < Math.min(items.length, maxVisible); i++) {
+    // 计算滚动视口的起始位置，确保选中项始终可见
+    let startIndex = 0;
+    if (selectedIndex >= maxVisible) {
+      startIndex = selectedIndex - maxVisible + 1;
+    }
+    const endIndex = Math.min(startIndex + maxVisible, items.length);
+
+    // 显示上方省略提示
+    if (startIndex > 0) {
+      console.log(chalk.gray(`  ... ${startIndex} ${t('moreItemsAbove', lang)}`));
+    }
+
+    for (let i = startIndex; i < endIndex; i++) {
       const item = items[i];
       const prefix = showIndex ? `${(i + 1).toString().padStart(2)}. ` : '  ';
       const marker = i === selectedIndex ? '› ' : '  ';
@@ -114,8 +126,9 @@ function renderList(
       }
     }
 
-    if (items.length > maxVisible) {
-      console.log(chalk.gray(`  ... ${items.length - maxVisible} ${t('moreItems', lang)}`));
+    // 显示下方省略提示
+    if (endIndex < items.length) {
+      console.log(chalk.gray(`  ... ${items.length - endIndex} ${t('moreItems', lang)}`));
     }
   }
 

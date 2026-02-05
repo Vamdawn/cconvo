@@ -43,6 +43,7 @@ const messages: Record<Language, Record<string, string>> = {
     listShortcutsSearch: '[Esc] Clear  [Enter] Select',
     noData: 'No data',
     moreItems: 'more items',
+    moreItemsAbove: 'more items above',
     // 加载提示
     detectingProject: 'Detecting current project...',
     detectedProject: 'Detected project',
@@ -124,6 +125,7 @@ const messages: Record<Language, Record<string, string>> = {
     listShortcutsSearch: '[Esc] 清除  [回车] 选择',
     noData: '无数据',
     moreItems: '项',
+    moreItemsAbove: '项在上方',
     // 加载提示
     detectingProject: '正在检测当前项目...',
     detectedProject: '检测到项目',

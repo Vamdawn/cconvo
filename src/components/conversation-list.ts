@@ -153,10 +153,23 @@ function renderList(
   }
 
   // 对话列表
+  const maxVisible = 15;
   if (conversations.length === 0) {
     console.log(chalk.yellow(searchTerm ? t('noMatchingConversations', getLang()) : t('noConversationsFound', getLang())));
   } else {
-    for (let i = 0; i < conversations.length && i < 15; i++) {
+    // 计算滚动视口的起始位置，确保选中项始终可见
+    let startIndex = 0;
+    if (selectedIndex >= maxVisible) {
+      startIndex = selectedIndex - maxVisible + 1;
+    }
+    const endIndex = Math.min(startIndex + maxVisible, conversations.length);
+
+    // 显示上方省略提示
+    if (startIndex > 0) {
+      console.log(chalk.gray(`  ... ${startIndex} ${t('moreItemsAbove', getLang())}`));
+    }
+
+    for (let i = startIndex; i < endIndex; i++) {
       const line = formatConversationItem(i, conversations[i], getLang());
       if (i === selectedIndex) {
         console.log(chalk.bgBlue.white(line));
@@ -165,8 +178,9 @@ function renderList(
       }
     }
 
-    if (conversations.length > 15) {
-      console.log(chalk.gray(`  ... ${conversations.length - 15} ${t('more', getLang())}`));
+    // 显示下方省略提示
+    if (endIndex < conversations.length) {
+      console.log(chalk.gray(`  ... ${conversations.length - endIndex} ${t('more', getLang())}`));
     }
   }
 

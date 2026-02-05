@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- 🐛 修复列表超过 15 项时无法滚动查看后续项目的问题
+
 ### Added
 
 - ✨ `export` command now supports partial session ID prefix matching (similar to git commit short hash)
