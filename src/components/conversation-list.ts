@@ -156,7 +156,8 @@ function renderList(
 
   // 标题
   const deletedTag = project.isDeleted ? chalk.red(` [${t('deleted', getLang())}]`) : '';
-  console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag + chalk.gray(` (${t('currentProject', getLang())})`));
+  console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag);
+  console.log(chalk.gray(`  ${project.originalPath}`));
   console.log(chalk.bold('─'.repeat(40)));
   console.log();
 
@@ -168,7 +169,7 @@ function renderList(
 
   // 计算可用行数：终端高度 - banner(4) - 项目标题(3) - 信息面板(10) - 快捷键(2) - 搜索栏
   const infoBoxHeight = 10;
-  const headerHeight = 7 + (searchTerm ? 2 : 0);
+  const headerHeight = 8 + (searchTerm ? 2 : 0);
   const footerHeight = 2;
   const availableRows = (process.stdout.rows || 24) - headerHeight - infoBoxHeight - footerHeight;
   const maxVisible = Math.max(5, Math.min(15, availableRows));
@@ -245,8 +246,15 @@ export async function showConversationList(
 
   return new Promise(resolve => {
     const handleKeypress = async (str: string | undefined, key: readline.Key) => {
+      // 计算可见行数用于翻页
+      const infoBoxHeight = 10;
+      const headerHeight = 8 + (searchTerm ? 2 : 0);
+      const footerHeight = 2;
+      const availableRows = (process.stdout.rows || 24) - headerHeight - infoBoxHeight - footerHeight;
+      const maxVisible = Math.max(5, Math.min(15, availableRows));
+
       // 搜索模式下的按键处理
-      if (searchTerm !== '' || key.name === 'slash' || str === '/') {
+      if (searchTerm !== '') {
         if (key.name === 'escape') {
           searchTerm = '';
           filterConversations();
@@ -287,6 +295,16 @@ export async function showConversationList(
           selectedIndex = Math.min(filteredConversations.length - 1, selectedIndex + 1);
           renderList(project, filteredConversations, selectedIndex, searchTerm);
           break;
+        case 'left':
+          // 向上翻页
+          selectedIndex = Math.max(0, selectedIndex - maxVisible);
+          renderList(project, filteredConversations, selectedIndex, searchTerm);
+          break;
+        case 'right':
+          // 向下翻页
+          selectedIndex = Math.min(filteredConversations.length - 1, selectedIndex + maxVisible);
+          renderList(project, filteredConversations, selectedIndex, searchTerm);
+          break;
         case 'escape':
           process.stdin.removeListener('keypress', handleKeypress);
           process.stdin.setRawMode(false);
@@ -316,7 +334,7 @@ export async function showConversationList(
                 console.clear();
                 resolve({ action: 'quit' });
                 return;
-              case 'm':
+              case 'h':
                 process.stdin.removeListener('keypress', handleKeypress);
                 process.stdin.setRawMode(false);
                 console.clear();
@@ -341,11 +359,6 @@ export async function showConversationList(
                   process.stdin.on('keypress', handleKeypress);
                   renderList(project, filteredConversations, selectedIndex, searchTerm);
                 }
-                break;
-              case '/':
-                // 进入搜索模式
-                searchTerm = '';
-                renderList(project, filteredConversations, selectedIndex, searchTerm);
                 break;
             }
           }

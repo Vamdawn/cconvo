@@ -26,6 +26,7 @@ export interface ListConfig {
   maxVisible?: number;
   showIndex?: boolean;
   showBanner?: boolean;
+  showCount?: boolean;  // 是否显示计数，默认 true
   shortcuts?: ListShortcut[];
   language?: Language;
 }
@@ -84,7 +85,8 @@ function renderList(
 
   // 标题和计数
   const count = items.length;
-  console.log(chalk.bold(`  ${config.title}`) + chalk.gray(` (${count})`));
+  const countText = config.showCount !== false ? chalk.gray(` (${count})`) : '';
+  console.log(chalk.bold(`  ${config.title}`) + countText);
   console.log();
 
   // 搜索状态
@@ -215,6 +217,22 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
           selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + 1);
           renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           break;
+        case 'left':
+          // 向上翻页
+          {
+            const pageSize = config.maxVisible || 15;
+            selectedIndex = Math.max(0, selectedIndex - pageSize);
+            renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
+          }
+          break;
+        case 'right':
+          // 向下翻页
+          {
+            const pageSize = config.maxVisible || 15;
+            selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + pageSize);
+            renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
+          }
+          break;
         case 'return':
           if (filteredItems.length > 0) {
             cleanup({ action: 'select', item: filteredItems[selectedIndex] });
@@ -243,8 +261,8 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
               return;
             }
 
-            // m 主菜单
-            if (str.toLowerCase() === 'm') {
+            // h 主菜单
+            if (str.toLowerCase() === 'h') {
               console.clear();
               cleanup({ action: 'main' });
               return;

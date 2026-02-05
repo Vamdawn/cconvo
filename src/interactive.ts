@@ -27,7 +27,7 @@ export function getCurrentLanguage(): Language {
 type NavigationResult = 'continue' | 'back' | 'main';
 
 // 显示主菜单
-async function showMainMenu(): Promise<'browse' | 'stats' | 'settings' | 'quit'> {
+async function showMainMenu(): Promise<'browse' | 'stats' | 'settings' | 'quit' | 'continue'> {
   const menuItems: ListItem[] = [
     { id: 'browse', label: t('browseProjects', currentLang), description: '' },
     { id: 'stats', label: t('viewStatistics', currentLang), description: '' },
@@ -35,14 +35,19 @@ async function showMainMenu(): Promise<'browse' | 'stats' | 'settings' | 'quit'>
   ];
 
   const result = await showInteractiveList({
-    title: t('menu', currentLang),
+    title: t('home', currentLang),
     items: menuItems,
     showBanner: true,
+    showCount: false,
     language: currentLang,
   });
 
-  if (result.action === 'quit' || result.action === 'back') {
+  if (result.action === 'quit') {
     return 'quit';
+  }
+
+  if (result.action === 'back' || result.action === 'main') {
+    return 'continue';  // ESC 在主菜单时继续显示主菜单
   }
 
   return result.item?.id as 'browse' | 'stats' | 'settings';
@@ -109,6 +114,9 @@ export async function runInteractive(): Promise<void> {
       case 'quit':
         console.log(chalk.gray(`\n${t('goodbye', currentLang)}`));
         return;
+      case 'continue':
+        // ESC 按下，继续显示主菜单
+        break;
     }
   }
 }
