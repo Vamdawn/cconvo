@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-02-06
+
 ### Added
 
 - ✨ List components support left/right arrow keys for page navigation
@@ -16,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ♻️ Home shortcut key changed from `[m]` to `[h]`
 - ♻️ Main menu title changed from "Menu" to "Home", count display removed
 - ♻️ Conversation list now displays project absolute path instead of "(Current Project)"
+- ♻️ Back shortcut key changed from `[Esc]` to `[b]`
 
 ### Removed
 
@@ -24,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - 🐛 Fix program freeze when pressing ESC in main menu
+- 🐛 Fix ESC key causing UI lag when returning, changed to `[b]` key
 
 ## [1.6.0] - 2026-02-06
 
