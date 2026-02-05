@@ -7,7 +7,7 @@ import {
   isJsonlFile,
   extractSessionId,
 } from '../utils/path.js';
-import type { Project, ConversationSummary, ScanResult } from '../models/types.js';
+import type { Project, ConversationSummary, ScanResult, TokenUsage } from '../models/types.js';
 import { parseConversationMeta } from './parser.js';
 import { parallelLimit } from '../utils/async.js';
 import {
@@ -124,7 +124,14 @@ export async function scanProject(dirPath: string, encodedPath: string): Promise
         const mtime = fileStat.mtimeMs;
 
         // 尝试从缓存获取元数据
-        let meta: { slug?: string; startTime: Date; endTime: Date; messageCount: number };
+        let meta: {
+          slug?: string;
+          startTime: Date;
+          endTime: Date;
+          messageCount: number;
+          totalTokens: TokenUsage;
+          firstUserMessage?: string;
+        };
         const cached = getCacheEntry(filePath, mtime);
 
         if (cached) {
@@ -134,6 +141,13 @@ export async function scanProject(dirPath: string, encodedPath: string): Promise
             startTime: new Date(cached.startTime),
             endTime: new Date(cached.endTime),
             messageCount: cached.messageCount,
+            totalTokens: cached.totalTokens || {
+              input_tokens: 0,
+              output_tokens: 0,
+              cache_creation_input_tokens: 0,
+              cache_read_input_tokens: 0,
+            },
+            firstUserMessage: cached.firstUserMessage,
           };
         } else {
           // 解析文件并更新缓存
@@ -146,6 +160,8 @@ export async function scanProject(dirPath: string, encodedPath: string): Promise
             startTime: parsed.startTime.toISOString(),
             endTime: parsed.endTime.toISOString(),
             messageCount: parsed.messageCount,
+            totalTokens: parsed.totalTokens,
+            firstUserMessage: parsed.firstUserMessage,
           });
         }
 
@@ -161,6 +177,10 @@ export async function scanProject(dirPath: string, encodedPath: string): Promise
           messageCount: meta.messageCount,
           fileSize: fileStat.size,
           hasSubagents,
+          // 新增字段
+          duration: meta.endTime.getTime() - meta.startTime.getTime(),
+          totalTokens: meta.totalTokens,
+          firstUserMessage: meta.firstUserMessage,
         } as ConversationSummary;
       }
     );

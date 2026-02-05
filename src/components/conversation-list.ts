@@ -1,7 +1,7 @@
 // src/components/conversation-list.ts
 import chalk from 'chalk';
 import readline from 'readline';
-import { formatDateTime } from '../utils/format.js';
+import { formatDateTime, formatSize, formatTokens, formatDuration } from '../utils/format.js';
 import { t, type Language } from '../utils/i18n.js';
 import { exportConversation, getFileExtension } from '../exporters/index.js';
 import { parseConversation } from '../core/parser.js';
@@ -32,23 +32,37 @@ function formatConversationItem(
   return `  ${(index + 1).toString().padStart(2)}. ${time}  ${title} (${msgs})`;
 }
 
-// 显示对话信息
-async function showInfo(
-  project: Project,
-  conv: ConversationSummary
-): Promise<void> {
-  console.log();
-  console.log(chalk.bold('─'.repeat(40)));
-  console.log(chalk.bold(t('conversationInfo', getLang())));
-  console.log(chalk.bold('─'.repeat(40)));
-  console.log(`${chalk.gray(t('sessionId', getLang()) + ':')}    ${conv.sessionId}`);
-  console.log(`${chalk.gray(t('startTime', getLang()) + ':')}  ${formatDateTime(conv.startTime)}`);
-  console.log(`${chalk.gray(t('messageCount', getLang()) + ':')}  ${conv.messageCount}`);
-  console.log(`${chalk.gray(t('projectPath', getLang()) + ':')}  ${project.originalPath}`);
-  console.log();
-  console.log(t('pressAnyKeyToReturn', getLang()));
+// 渲染信息面板
+function renderInfoPanel(conv: ConversationSummary): void {
+  const lang = getLang();
+  const width = Math.min(process.stdout.columns || 60, 60);
+  const line = '─'.repeat(width);
 
-  await waitForKeypress();
+  console.log(chalk.gray(line));
+  console.log(chalk.bold(` ${t('conversationInfo', lang)}`));
+  console.log(chalk.gray(line));
+
+  // 第一行：开始时间 + 时长
+  const startTimeLabel = `${t('startTime', lang)}:`;
+  const durationLabel = `${t('duration', lang)}:`;
+  console.log(` ${chalk.gray(startTimeLabel)} ${formatDateTime(conv.startTime)}    ${chalk.gray(durationLabel)} ${formatDuration(conv.duration)}`);
+
+  // 第二行：消息数量 + 文件大小
+  const msgCountLabel = `${t('messageCount', lang)}:`;
+  const sizeLabel = `${t('fileSize', lang)}:`;
+  console.log(` ${chalk.gray(msgCountLabel)} ${conv.messageCount}    ${chalk.gray(sizeLabel)} ${formatSize(conv.fileSize)}`);
+
+  // 第三行：Token 统计
+  const inputLabel = t('inputTokens', lang);
+  const outputLabel = t('outputTokens', lang);
+  console.log(` ${chalk.gray('Token:')} ${inputLabel} ${formatTokens(conv.totalTokens.input_tokens)} / ${outputLabel} ${formatTokens(conv.totalTokens.output_tokens)}`);
+
+  console.log(chalk.gray(line));
+
+  // 首条消息
+  console.log(` ${chalk.gray(t('firstMessage', lang) + ':')}`);
+  console.log(` ${chalk.dim(conv.firstUserMessage || t('none', lang))}`);
+  console.log(chalk.gray(line));
 }
 
 // 快速导出（使用默认格式 Markdown）
@@ -152,8 +166,14 @@ function renderList(
     console.log();
   }
 
+  // 计算可用行数：终端高度 - banner(4) - 项目标题(3) - 信息面板(10) - 快捷键(2) - 搜索栏
+  const infoBoxHeight = 10;
+  const headerHeight = 7 + (searchTerm ? 2 : 0);
+  const footerHeight = 2;
+  const availableRows = (process.stdout.rows || 24) - headerHeight - infoBoxHeight - footerHeight;
+  const maxVisible = Math.max(5, Math.min(15, availableRows));
+
   // 对话列表
-  const maxVisible = 15;
   if (conversations.length === 0) {
     console.log(chalk.yellow(searchTerm ? t('noMatchingConversations', getLang()) : t('noConversationsFound', getLang())));
   } else {
@@ -184,8 +204,14 @@ function renderList(
     }
   }
 
-  // 快捷键提示
   console.log();
+
+  // 渲染信息面板
+  if (conversations.length > 0) {
+    renderInfoPanel(conversations[selectedIndex]);
+  }
+
+  // 快捷键提示
   console.log(chalk.gray(searchTerm ? t('shortcutsSearch', getLang()) : t('shortcuts', getLang())));
 }
 
@@ -228,15 +254,7 @@ export async function showConversationList(
           return;
         }
         if (key.name === 'return') {
-          if (filteredConversations.length > 0) {
-            // 进入选中对话的操作
-            process.stdin.removeListener('keypress', handleKeypress);
-            process.stdin.setRawMode(false);
-            await showInfo(project, filteredConversations[selectedIndex]);
-            // 返回后重新启动
-            process.stdin.setRawMode(true);
-            process.stdin.on('keypress', handleKeypress);
-          }
+          // 搜索模式下按回车仅重新渲染（信息已自动显示）
           renderList(project, filteredConversations, selectedIndex, searchTerm);
           return;
         }
@@ -268,16 +286,6 @@ export async function showConversationList(
         case 'down':
           selectedIndex = Math.min(filteredConversations.length - 1, selectedIndex + 1);
           renderList(project, filteredConversations, selectedIndex, searchTerm);
-          break;
-        case 'return':
-          if (filteredConversations.length > 0) {
-            process.stdin.removeListener('keypress', handleKeypress);
-            process.stdin.setRawMode(false);
-            await showInfo(project, filteredConversations[selectedIndex]);
-            process.stdin.setRawMode(true);
-            process.stdin.on('keypress', handleKeypress);
-            renderList(project, filteredConversations, selectedIndex, searchTerm);
-          }
           break;
         case 'escape':
           process.stdin.removeListener('keypress', handleKeypress);
@@ -329,16 +337,6 @@ export async function showConversationList(
                   process.stdin.removeListener('keypress', handleKeypress);
                   process.stdin.setRawMode(false);
                   await exportWithOptions(project, filteredConversations[selectedIndex]);
-                  process.stdin.setRawMode(true);
-                  process.stdin.on('keypress', handleKeypress);
-                  renderList(project, filteredConversations, selectedIndex, searchTerm);
-                }
-                break;
-              case 'i':
-                if (filteredConversations.length > 0) {
-                  process.stdin.removeListener('keypress', handleKeypress);
-                  process.stdin.setRawMode(false);
-                  await showInfo(project, filteredConversations[selectedIndex]);
                   process.stdin.setRawMode(true);
                   process.stdin.on('keypress', handleKeypress);
                   renderList(project, filteredConversations, selectedIndex, searchTerm);

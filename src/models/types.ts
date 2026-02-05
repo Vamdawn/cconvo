@@ -166,6 +166,10 @@ export interface ConversationSummary {
   messageCount: number;
   fileSize: number;
   hasSubagents: boolean;
+  // 新增字段
+  duration: number;              // 对话时长（毫秒）
+  totalTokens: TokenUsage;       // Token 统计
+  firstUserMessage?: string;     // 第一条用户消息（截断至 100 字符）
 }
 
 // 扫描结果

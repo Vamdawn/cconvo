@@ -28,8 +28,15 @@ const messages: Record<Language, Record<string, string>> = {
     searchPlaceholder: 'Search',
     noMatchingConversations: 'No matching conversations',
     clearSearch: 'Clear search',
+    // 信息面板
+    duration: 'Duration',
+    fileSize: 'Size',
+    inputTokens: 'Input',
+    outputTokens: 'Output',
+    firstMessage: 'First Message',
+    none: '(None)',
     // 快捷键提示
-    shortcuts: '[e] Export  [i] Info  [/] Search  [Esc] Back  [m] Home  [q] Quit',
+    shortcuts: '[e] Export  [/] Search  [Esc] Back  [m] Home  [q] Quit',
     shortcutsSearch: '[Esc] Clear  [Enter] Select',
     // 项目浏览相关
     browseProjects: 'Browse Projects',
@@ -111,8 +118,15 @@ const messages: Record<Language, Record<string, string>> = {
     searchPlaceholder: '搜索',
     noMatchingConversations: '没有匹配的对话',
     clearSearch: '清除搜索',
+    // 信息面板
+    duration: '时长',
+    fileSize: '大小',
+    inputTokens: '输入',
+    outputTokens: '输出',
+    firstMessage: '首条消息',
+    none: '(无)',
     // 快捷键提示
-    shortcuts: '[e] 导出  [i] 信息  [/] 搜索  [Esc] 返回  [m] 首页  [q] 退出',
+    shortcuts: '[e] 导出  [/] 搜索  [Esc] 返回  [m] 首页  [q] 退出',
     shortcutsSearch: '[Esc] 清除  [回车] 选择',
     // 项目浏览相关
     browseProjects: '浏览项目',

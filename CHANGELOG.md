@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Auto-generate bilingual CHANGELOG (English/Chinese)
   - Interactive preview before execution
   - Create git commit and tag
+- ✨ Add split-screen info panel for conversation list
+  - Display conversation info automatically when selected (no need to press Enter or [i])
+  - Show duration, file size, token usage (input/output), and first user message preview
+  - Cache new metadata fields (totalTokens, firstUserMessage) for faster loading
+  - Dynamic list height calculation based on terminal size
 
 ## [1.5.1] - 2026-02-05
 

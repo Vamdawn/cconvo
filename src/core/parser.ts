@@ -17,6 +17,9 @@ interface ConversationMeta {
   startTime: Date;
   endTime: Date;
   messageCount: number;
+  // 新增字段
+  totalTokens: TokenUsage;
+  firstUserMessage?: string;
 }
 
 // 解析对话文件元数据（快速扫描）
@@ -25,6 +28,13 @@ export async function parseConversationMeta(filePath: string): Promise<Conversat
   let startTime: Date | undefined;
   let endTime: Date | undefined;
   let messageCount = 0;
+  let firstUserMessage: string | undefined;
+  const totalTokens: TokenUsage = {
+    input_tokens: 0,
+    output_tokens: 0,
+    cache_creation_input_tokens: 0,
+    cache_read_input_tokens: 0,
+  };
 
   const fileStream = createReadStream(filePath);
   const rl = createInterface({
@@ -39,8 +49,9 @@ export async function parseConversationMeta(filePath: string): Promise<Conversat
       const record = JSON.parse(line) as MessageRecord;
       messageCount++;
 
-      if (record.type === 'user' || record.type === 'assistant') {
-        const timestamp = new Date(record.timestamp);
+      if (record.type === 'user') {
+        const userMsg = record as UserMessage;
+        const timestamp = new Date(userMsg.timestamp);
 
         if (!startTime || timestamp < startTime) {
           startTime = timestamp;
@@ -50,8 +61,46 @@ export async function parseConversationMeta(filePath: string): Promise<Conversat
         }
 
         // 从用户消息中提取slug
-        if (record.type === 'user' && (record as UserMessage).slug && !slug) {
-          slug = (record as UserMessage).slug;
+        if (userMsg.slug && !slug) {
+          slug = userMsg.slug;
+        }
+
+        // 提取第一条用户消息
+        if (!firstUserMessage) {
+          const content = userMsg.message.content;
+          if (typeof content === 'string') {
+            firstUserMessage = content;
+          } else {
+            const textBlock = content.find(b => b.type === 'text');
+            if (textBlock && 'text' in textBlock) {
+              firstUserMessage = textBlock.text;
+            }
+          }
+          // 截断至 100 字符
+          if (firstUserMessage && firstUserMessage.length > 100) {
+            firstUserMessage = firstUserMessage.slice(0, 100) + '...';
+          }
+        }
+      }
+
+      if (record.type === 'assistant') {
+        const assistantMsg = record as AssistantMessage;
+        const timestamp = new Date(assistantMsg.timestamp);
+
+        if (!startTime || timestamp < startTime) {
+          startTime = timestamp;
+        }
+        if (!endTime || timestamp > endTime) {
+          endTime = timestamp;
+        }
+
+        // 累计 token 使用
+        if (assistantMsg.message?.usage) {
+          const usage = assistantMsg.message.usage;
+          totalTokens.input_tokens += usage.input_tokens || 0;
+          totalTokens.output_tokens += usage.output_tokens || 0;
+          totalTokens.cache_creation_input_tokens! += usage.cache_creation_input_tokens || 0;
+          totalTokens.cache_read_input_tokens! += usage.cache_read_input_tokens || 0;
         }
       }
     } catch {
@@ -64,6 +113,8 @@ export async function parseConversationMeta(filePath: string): Promise<Conversat
     startTime: startTime || new Date(),
     endTime: endTime || new Date(),
     messageCount,
+    totalTokens,
+    firstUserMessage,
   };
 }
 
