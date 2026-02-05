@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - ✨ 新增 `parallelLimit` 异步工具函数，支持带并发限制的并行执行
+- ✨ 新增元数据缓存机制，缓存存储在 `~/.cconvo/cache.json`
 
 ### Changed
 
-- ⚡️ 优化项目和对话扫描性能，使用并行处理提升 3-5 倍速度
+- ⚡️ 优化项目和对话扫描性能，使用并行处理 + 缓存机制，二次扫描提升 5-10 倍速度
 
 ## [1.4.0] - 2026-02-05
 
