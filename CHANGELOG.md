@@ -7,52 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-02-05
+
 ### Added
 
-- ✨ 新增 `parallelLimit` 异步工具函数，支持带并发限制的并行执行
-- ✨ 新增元数据缓存机制，缓存存储在 `~/.cconvo/cache.json`
+- ✨ Add metadata cache mechanism, stored in `~/.cconvo/cache.json`
+  - Automatically cache conversation metadata after first scan
+  - Validate cache based on file modification time
 
 ### Changed
 
-- ⚡️ 优化项目和对话扫描性能，使用并行处理 + 缓存机制，二次扫描提升 5-10 倍速度
+- ⚡️ Significantly improve project and conversation scanning performance
+  - Use parallel processing to scan multiple projects and conversations
+  - Combined with caching, second launch is ~70x faster
 
 ## [1.4.0] - 2026-02-05
 
 ### Added
 
-- ✨ `export` 命令支持部分会话 ID 前缀匹配（类似 git commit 短哈希）
-  - 最小前缀长度：4 字符
-  - 前缀不明确时显示所有匹配项
-- ✨ 交互式界面自动检测当前项目，直接显示对话列表
-- ✨ 对话列表支持快捷键操作
-  - `e` 快捷导出 Markdown，`E` 选择格式导出
-  - `i` 查看对话信息
-  - `/` 搜索过滤，`Esc` 清除搜索
-  - `1-9` 快速选择，上下键导航
-  - `m` 返回主菜单，`q` 退出
-- ✨ 扩展国际化支持（中/英文界面文案）
-- ✨ 新增设置菜单，支持语言切换（英文/简体中文）
-- ✨ 新增持久化配置存储（~/.cconvo/settings.json）
-- ✨ CLI 命令（list、export、stats）支持国际化
+- ✨ `export` command supports partial session ID prefix matching (like git commit short hash)
+  - Minimum prefix length: 4 characters
+  - Shows all matches when prefix is ambiguous
+- ✨ Interactive interface auto-detects current project and shows conversation list directly
+- ✨ Conversation list keyboard shortcuts
+  - `e` quick export to Markdown, `E` select format to export
+  - `i` view conversation info
+  - `/` search filter, `Esc` clear search
+  - `1-9` quick select, arrow keys to navigate
+  - `m` return to main menu, `q` quit
+- ✨ Extended i18n support (Chinese/English UI)
+- ✨ New settings menu with language switch (English/Simplified Chinese)
+- ✨ Persistent settings storage (~/.cconvo/settings.json)
+- ✨ CLI commands (list, export, stats) support i18n
 
 ### Changed
 
-- ♻️ 统一所有列表页面为键盘事件驱动交互风格
-- ♻️ 抽象 InteractiveList 组件复用
-- ♻️ 统一所有 UI 字符串使用 i18n 国际化
-- ✨ 将 `[m] 菜单` 快捷键提示改为 `[m] 首页`，更清晰表达返回主界面
-- ✨ 使用滚动清屏代替直接清屏，保留终端历史上下文
-- ✨ 操作完成后返回对话列表而非退出程序
-- ✨ 检测当前项目时显示加载提示
+- ♻️ Unified all list pages to keyboard event-driven interaction style
+- ♻️ Abstract InteractiveList component for reuse
+- ♻️ Unified all UI strings to use i18n
+- ✨ Changed `[m] Menu` shortcut hint to `[m] Home` for clarity
+- ✨ Use scroll clear instead of direct clear to preserve terminal history
+- ✨ Return to conversation list after operation instead of exiting
+- ✨ Show loading indicator when detecting current project
 
 ### Removed
 
-- 移除独立搜索页面，改为列表内 `/` 搜索
-- 移除 inquirer 依赖
+- Removed standalone search page, replaced with in-list `/` search
+- Removed inquirer dependency
 
 ### Fixed
 
-- 🐛 修复列表超过 15 项时无法滚动查看后续项目的问题
+- 🐛 Fix scrolling issue when list has more than 15 items
 
 ## [1.3.0] - 2026-02-03
 
