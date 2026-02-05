@@ -12,6 +12,12 @@ import { getLanguage, setLanguage } from './utils/settings.js';
 // 当前语言（从配置加载）
 let currentLang: Language = getLanguage();
 
+// 语言显示名称
+const LANGUAGE_NAMES: Record<Language, string> = {
+  en: 'English',
+  zh: '简体中文',
+};
+
 // 获取当前语言（供其他模块使用）
 export function getCurrentLanguage(): Language {
   return currentLang;
@@ -21,10 +27,11 @@ export function getCurrentLanguage(): Language {
 type NavigationResult = 'continue' | 'back' | 'main';
 
 // 显示主菜单
-async function showMainMenu(): Promise<'browse' | 'stats' | 'quit'> {
+async function showMainMenu(): Promise<'browse' | 'stats' | 'settings' | 'quit'> {
   const menuItems: ListItem[] = [
     { id: 'browse', label: t('browseProjects', currentLang), description: '' },
     { id: 'stats', label: t('viewStatistics', currentLang), description: '' },
+    { id: 'settings', label: t('settings', currentLang), description: '' },
   ];
 
   const result = await showInteractiveList({
@@ -38,7 +45,7 @@ async function showMainMenu(): Promise<'browse' | 'stats' | 'quit'> {
     return 'quit';
   }
 
-  return result.item?.id as 'browse' | 'stats';
+  return result.item?.id as 'browse' | 'stats' | 'settings';
 }
 
 // 等待任意键
@@ -95,6 +102,9 @@ export async function runInteractive(): Promise<void> {
         break;
       case 'stats':
         await showStatistics();
+        break;
+      case 'settings':
+        await showSettings();
         break;
       case 'quit':
         console.log(chalk.gray(`\n${t('goodbye', currentLang)}`));
@@ -195,4 +205,68 @@ async function showStatistics(): Promise<void> {
   console.log(chalk.gray(`  ${t('pressAnyKeyToReturn', currentLang)}`));
 
   await waitForAnyKey();
+}
+
+// 显示设置菜单
+async function showSettings(): Promise<void> {
+  while (true) {
+    const currentLanguageName = LANGUAGE_NAMES[currentLang];
+
+    const settingsItems: ListItem[] = [
+      {
+        id: 'language',
+        label: `${t('language', currentLang)}: ${currentLanguageName}`,
+        description: ''
+      },
+    ];
+
+    const result = await showInteractiveList({
+      title: t('settings', currentLang),
+      items: settingsItems,
+      showBanner: true,
+      language: currentLang,
+    });
+
+    if (result.action === 'quit') {
+      process.exit(0);
+    }
+
+    if (result.action === 'back' || result.action === 'main') {
+      return;
+    }
+
+    if (result.action === 'select' && result.item?.id === 'language') {
+      await showLanguageSettings();
+    }
+  }
+}
+
+// 显示语言设置
+async function showLanguageSettings(): Promise<void> {
+  const languages: Language[] = ['en', 'zh'];
+
+  const languageItems: ListItem[] = languages.map(lang => ({
+    id: lang,
+    label: LANGUAGE_NAMES[lang],
+    description: lang === currentLang ? '✓' : '',
+  }));
+
+  const result = await showInteractiveList({
+    title: t('selectLanguage', currentLang),
+    items: languageItems,
+    showBanner: true,
+    language: currentLang,
+  });
+
+  if (result.action === 'quit') {
+    process.exit(0);
+  }
+
+  if (result.action === 'select' && result.item) {
+    const newLang = result.item.id as Language;
+    if (newLang !== currentLang) {
+      setLanguage(newLang);
+      currentLang = newLang;
+    }
+  }
 }

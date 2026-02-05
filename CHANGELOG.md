@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `1-9` 快速选择，上下键导航
   - `m` 返回主菜单，`q` 退出
 - ✨ 扩展国际化支持（中/英文界面文案）
+- ✨ 新增设置菜单，支持语言切换（英文/简体中文）
 
 ### Changed
 
