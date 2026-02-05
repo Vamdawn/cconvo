@@ -7,8 +7,15 @@ import { showBanner } from './components/banner.js';
 import { showInteractiveList, type ListItem } from './components/interactive-list.js';
 import { t, type Language } from './utils/i18n.js';
 import { formatSize } from './utils/format.js';
+import { getLanguage, setLanguage } from './utils/settings.js';
 
-const UI_LANG: Language = 'en';
+// 当前语言（从配置加载）
+let currentLang: Language = getLanguage();
+
+// 获取当前语言（供其他模块使用）
+export function getCurrentLanguage(): Language {
+  return currentLang;
+}
 
 // 导航结果类型
 type NavigationResult = 'continue' | 'back' | 'main';
@@ -16,15 +23,15 @@ type NavigationResult = 'continue' | 'back' | 'main';
 // 显示主菜单
 async function showMainMenu(): Promise<'browse' | 'stats' | 'quit'> {
   const menuItems: ListItem[] = [
-    { id: 'browse', label: t('browseProjects', UI_LANG), description: '' },
-    { id: 'stats', label: t('viewStatistics', UI_LANG), description: '' },
+    { id: 'browse', label: t('browseProjects', currentLang), description: '' },
+    { id: 'stats', label: t('viewStatistics', currentLang), description: '' },
   ];
 
   const result = await showInteractiveList({
-    title: t('menu', UI_LANG),
+    title: t('menu', currentLang),
     items: menuItems,
     showBanner: true,
-    language: UI_LANG,
+    language: currentLang,
   });
 
   if (result.action === 'quit' || result.action === 'back') {
@@ -52,18 +59,18 @@ export async function runInteractive(): Promise<void> {
 
   // 检测当前目录是否为已记录的项目
   const cwd = process.cwd();
-  const spinner = ora(t('detectingProject', UI_LANG)).start();
+  const spinner = ora(t('detectingProject', currentLang)).start();
   const currentProject = await findProjectByPath(cwd);
 
   if (currentProject && currentProject.conversations.length > 0) {
-    spinner.succeed(`${t('detectedProject', UI_LANG)}: ${currentProject.name} (${currentProject.conversations.length} ${t('conversations', UI_LANG)})`);
+    spinner.succeed(`${t('detectedProject', currentLang)}: ${currentProject.name} (${currentProject.conversations.length} ${t('conversations', currentLang)})`);
 
     // 循环显示对话列表，直到用户选择退出或返回主菜单
     while (true) {
       const result = await showConversationList(currentProject);
 
       if (result.action === 'quit') {
-        console.log(chalk.gray(`\n${t('goodbye', UI_LANG)}`));
+        console.log(chalk.gray(`\n${t('goodbye', currentLang)}`));
         return;
       }
 
@@ -90,7 +97,7 @@ export async function runInteractive(): Promise<void> {
         await showStatistics();
         break;
       case 'quit':
-        console.log(chalk.gray(`\n${t('goodbye', UI_LANG)}`));
+        console.log(chalk.gray(`\n${t('goodbye', currentLang)}`));
         return;
     }
   }
@@ -98,28 +105,28 @@ export async function runInteractive(): Promise<void> {
 
 // 浏览项目
 async function browseProjects(): Promise<NavigationResult> {
-  const spinner = ora(t('loadingProjects', UI_LANG)).start();
+  const spinner = ora(t('loadingProjects', currentLang)).start();
   const result = await scanProjects();
   spinner.stop();
 
   if (result.projects.length === 0) {
-    console.log(chalk.yellow(`\n${t('noProjects', UI_LANG)}\n`));
+    console.log(chalk.yellow(`\n${t('noProjects', currentLang)}\n`));
     await waitForAnyKey();
     return 'back';
   }
 
   const projectItems: ListItem[] = result.projects.map(p => ({
     id: p.originalPath,
-    label: p.isDeleted ? `${p.name} ${chalk.red(`[${t('deleted', UI_LANG)}]`)}` : p.name,
-    description: `${p.totalConversations} ${t('conversations', UI_LANG)}`,
+    label: p.isDeleted ? `${p.name} ${chalk.red(`[${t('deleted', currentLang)}]`)}` : p.name,
+    description: `${p.totalConversations} ${t('conversations', currentLang)}`,
     data: p,
   }));
 
   const listResult = await showInteractiveList({
-    title: t('selectProject', UI_LANG),
+    title: t('selectProject', currentLang),
     items: projectItems,
     showBanner: true,
-    language: UI_LANG,
+    language: currentLang,
   });
 
   if (listResult.action === 'quit') {
@@ -158,22 +165,22 @@ async function browseConversations(project: Project): Promise<NavigationResult> 
 
 // 显示统计
 async function showStatistics(): Promise<void> {
-  const spinner = ora(t('calculatingStats', UI_LANG)).start();
+  const spinner = ora(t('calculatingStats', currentLang)).start();
   const result = await scanProjects();
   spinner.stop();
 
   console.clear();
   showBanner();
 
-  console.log(chalk.bold(`  📊 ${t('statistics', UI_LANG)}`));
+  console.log(chalk.bold(`  📊 ${t('statistics', currentLang)}`));
   console.log();
-  console.log(`  ${chalk.gray(t('totalProjects', UI_LANG) + ':')}       ${chalk.cyan(result.projects.length)}`);
-  console.log(`  ${chalk.gray(t('totalConversations', UI_LANG) + ':')}       ${chalk.cyan(result.totalConversations)}`);
-  console.log(`  ${chalk.gray(t('totalSize', UI_LANG) + ':')}         ${chalk.cyan(formatSize(result.totalSize))}`);
+  console.log(`  ${chalk.gray(t('totalProjects', currentLang) + ':')}       ${chalk.cyan(result.projects.length)}`);
+  console.log(`  ${chalk.gray(t('totalConversations', currentLang) + ':')}       ${chalk.cyan(result.totalConversations)}`);
+  console.log(`  ${chalk.gray(t('totalSize', currentLang) + ':')}         ${chalk.cyan(formatSize(result.totalSize))}`);
   console.log();
 
   // Top 10 项目
-  console.log(chalk.bold(`  ${t('topProjectsBySize', UI_LANG)}:`));
+  console.log(chalk.bold(`  ${t('topProjectsBySize', currentLang)}:`));
   console.log();
 
   const sorted = [...result.projects].sort((a, b) => b.totalSize - a.totalSize).slice(0, 10);
@@ -185,7 +192,7 @@ async function showStatistics(): Promise<void> {
   }
 
   console.log();
-  console.log(chalk.gray(`  ${t('pressAnyKeyToReturn', UI_LANG)}`));
+  console.log(chalk.gray(`  ${t('pressAnyKeyToReturn', currentLang)}`));
 
   await waitForAnyKey();
 }
