@@ -11,7 +11,7 @@ const CACHE_DIR = join(homedir(), '.cconvo');
 const CACHE_FILE = join(CACHE_DIR, 'cache.json');
 
 // 缓存版本，升级时递增以清除旧缓存
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 
 // 单个文件的缓存条目
 export interface CacheEntry {
