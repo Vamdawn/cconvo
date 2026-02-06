@@ -145,3 +145,14 @@ export function extractUserText(message: UserMessage): string {
 
   return '';
 }
+
+// 判断是否为 Compact Summary 消息
+export function isCompactSummary(message: UserMessage): boolean {
+  return message.isCompactSummary === true;
+}
+
+// 判断是否为 Task Notification 消息
+export function isTaskNotification(message: UserMessage): boolean {
+  const content = extractUserText(message);
+  return content.trim().startsWith('<task-notification>');
+}

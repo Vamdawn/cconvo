@@ -6,6 +6,8 @@ import {
   extractCommand,
   cleanUserInput,
   isSlashCommand,
+  isCompactSummary,
+  isTaskNotification,
 } from '../../src/utils/noise-filter.js';
 
 describe('isNoiseContent', () => {
@@ -105,5 +107,69 @@ describe('isSlashCommand', () => {
   it('应拒绝非斜杠开头的文本', () => {
     expect(isSlashCommand('hello')).toBe(false);
     expect(isSlashCommand('not/a/command')).toBe(false);
+  });
+});
+
+describe('isCompactSummary', () => {
+  it('应识别 compact summary 消息', () => {
+    const message = {
+      type: 'user' as const,
+      uuid: 'test',
+      parentUuid: null,
+      timestamp: '2026-01-01T00:00:00Z',
+      sessionId: 'test',
+      cwd: '/test',
+      isSidechain: false,
+      isCompactSummary: true,
+      message: { role: 'user' as const, content: 'This session is being continued...' },
+    };
+    expect(isCompactSummary(message)).toBe(true);
+  });
+
+  it('应拒绝普通用户消息', () => {
+    const message = {
+      type: 'user' as const,
+      uuid: 'test',
+      parentUuid: null,
+      timestamp: '2026-01-01T00:00:00Z',
+      sessionId: 'test',
+      cwd: '/test',
+      isSidechain: false,
+      message: { role: 'user' as const, content: 'Hello' },
+    };
+    expect(isCompactSummary(message)).toBe(false);
+  });
+});
+
+describe('isTaskNotification', () => {
+  it('应识别 task notification 消息', () => {
+    const message = {
+      type: 'user' as const,
+      uuid: 'test',
+      parentUuid: null,
+      timestamp: '2026-01-01T00:00:00Z',
+      sessionId: 'test',
+      cwd: '/test',
+      isSidechain: false,
+      message: {
+        role: 'user' as const,
+        content: '<task-notification>\n<task-id>abc123</task-id>\n</task-notification>',
+      },
+    };
+    expect(isTaskNotification(message)).toBe(true);
+  });
+
+  it('应拒绝普通用户消息', () => {
+    const message = {
+      type: 'user' as const,
+      uuid: 'test',
+      parentUuid: null,
+      timestamp: '2026-01-01T00:00:00Z',
+      sessionId: 'test',
+      cwd: '/test',
+      isSidechain: false,
+      message: { role: 'user' as const, content: 'Hello' },
+    };
+    expect(isTaskNotification(message)).toBe(false);
   });
 });
