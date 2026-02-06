@@ -13,9 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Test coverage for `core/parser.ts`, `core/scanner.ts`
   - Test coverage for `utils/format.ts`, `utils/path.ts`, `utils/noise-filter.ts`, `utils/i18n.ts`, `utils/cache.ts`
   - 67 test cases covering formatting, path encoding/decoding, noise filtering, i18n, and JSONL parsing
-- ✨ Add Task Notification parsing and formatting functions
-  - `parseTaskNotification()`: Parse XML format task notifications
-  - `formatTaskNotification()`: Format to Markdown table
+- ✨ Add message type annotation for Markdown export
+  - Compact Summary messages marked with `[Compacted]` / `[已压缩]`
+  - Task Notification messages marked with `[Agent]` / `[子Agent]`
+  - Task Notification content formatted as structured table
+  - `isCompactSummary()`, `isTaskNotification()` detection functions
+  - `parseTaskNotification()`, `formatTaskNotification()` formatting functions
   - Support i18n (Chinese/English)
 
 ## [1.6.1] - 2026-02-06
