@@ -1,6 +1,9 @@
 // 基础消息类型
 export type MessageType = 'user' | 'assistant' | 'file-history-snapshot' | 'summary';
 
+// 用户输入类型
+export type UserInputType = 'normal' | 'compacted' | 'agent';
+
 // Token使用统计
 export interface TokenUsage {
   input_tokens: number;
@@ -77,6 +80,9 @@ export interface UserMessage {
     disabled: boolean;
     triggers: string[];
   };
+  // Compact summary 相关字段
+  isCompactSummary?: boolean;
+  isVisibleInTranscriptOnly?: boolean;
 }
 
 // 助手消息记录
@@ -195,6 +201,7 @@ export interface ConversationTurn {
   turnNumber: number;
   timestamp: Date;
   userInput: string;
+  userInputType: UserInputType;
   assistantResponse: {
     text: string;
     thinkings: string[];
