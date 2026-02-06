@@ -25,6 +25,9 @@
     "start": "node dist/index.js",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "prepublishOnly": "pnpm build && pnpm typecheck",
     "postinstall": "node scripts/postinstall.js"
   },
@@ -57,8 +60,11 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
+    "@vitest/coverage-v8": "^4.0.18",
+    "memfs": "^4.56.10",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- ✨ Add Vitest testing framework with unit tests for core modules
+  - Test coverage for `core/parser.ts`, `core/scanner.ts`
+  - Test coverage for `utils/format.ts`, `utils/path.ts`, `utils/noise-filter.ts`, `utils/i18n.ts`, `utils/cache.ts`
+  - 67 test cases covering formatting, path encoding/decoding, noise filtering, i18n, and JSONL parsing
+
 ## [1.6.1] - 2026-02-06
 
 ### Added
