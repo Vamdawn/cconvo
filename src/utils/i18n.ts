@@ -92,6 +92,15 @@ const messages: Record<Language, Record<string, string>> = {
     andMore: 'and',
     moreConversations: 'more conversations',
     moreProjects: 'more projects',
+    // 消息类型标注
+    compacted: 'Compacted',
+    agent: 'Agent',
+    taskId: 'Task ID',
+    taskStatus: 'Status',
+    taskSummary: 'Summary',
+    taskResult: 'Result',
+    taskUsage: 'Usage',
+    taskTranscript: 'Transcript',
   },
   zh: {
     userInput: '用户输入',
@@ -183,6 +192,15 @@ const messages: Record<Language, Record<string, string>> = {
     andMore: '以及',
     moreConversations: '个对话',
     moreProjects: '个项目',
+    // 消息类型标注
+    compacted: '已压缩',
+    agent: '子Agent',
+    taskId: '任务ID',
+    taskStatus: '状态',
+    taskSummary: '摘要',
+    taskResult: '结果',
+    taskUsage: '用量',
+    taskTranscript: '完整记录',
   },
 };
 
