@@ -43,7 +43,8 @@ describe('formatTaskNotification', () => {
     expect(formatted).toContain('| **Task ID** | abc123 |');
     expect(formatted).toContain('| **Status** | completed |');
     expect(formatted).toContain('**Result:**');
-    expect(formatted).toContain('Done');
+    // result 应使用代码围栏包裹
+    expect(formatted).toContain('```\nDone\n```');
   });
 
   it('应正确格式化为中文', () => {

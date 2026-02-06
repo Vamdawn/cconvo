@@ -259,11 +259,14 @@ export function formatTaskNotification(data: TaskNotificationData, lang: Languag
   lines.push(`| **${t('taskSummary', lang)}** | ${data.summary} |`);
   lines.push('');
 
-  // 结果内容
+  // 结果内容（使用代码围栏包裹）
   if (data.result) {
     lines.push(`**${t('taskResult', lang)}:**`);
     lines.push('');
+    const resultFence = getFenceForContent(data.result);
+    lines.push(resultFence);
     lines.push(data.result);
+    lines.push(resultFence);
     lines.push('');
   }
 

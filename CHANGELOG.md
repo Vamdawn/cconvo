@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Compact Summary messages marked with `[Compacted]` / `[已压缩]`
   - Task Notification messages marked with `[Agent]` / `[子Agent]`
   - Task Notification content formatted as structured table
+  - Task Notification result (subagent response) wrapped in code fence
   - `isCompactSummary()`, `isTaskNotification()` detection functions
   - `parseTaskNotification()`, `formatTaskNotification()` formatting functions
   - Support i18n (Chinese/English)
