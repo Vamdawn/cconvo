@@ -7,6 +7,23 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-02-06
+
+### Added
+
+- ✨ 添加 Vitest 测试框架和核心模块单元测试
+  - 覆盖 `core/parser.ts`、`core/scanner.ts`
+  - 覆盖 `utils/format.ts`、`utils/path.ts`、`utils/noise-filter.ts`、`utils/i18n.ts`、`utils/cache.ts`
+  - 67 个测试用例，覆盖格式化、路径编解码、噪音过滤、国际化、JSONL 解析
+- ✨ Markdown 导出支持消息类型标注
+  - Compact Summary 消息标注为 `[Compacted]` / `[已压缩]`
+  - Task Notification 消息标注为 `[Agent]` / `[子Agent]`
+  - Task Notification 内容格式化为结构化表格
+  - Task Notification 结果（子Agent回复）使用代码围栏包裹
+  - `isCompactSummary()`、`isTaskNotification()` 检测函数
+  - `parseTaskNotification()`、`formatTaskNotification()` 格式化函数
+  - 支持中英文国际化
+
 ## [1.6.1] - 2026-02-06
 
 ### Added
