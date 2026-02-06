@@ -5,6 +5,7 @@ import type {
   AssistantMessage,
   ExportOptions,
   ConversationTurn,
+  UserInputType,
 } from '../models/types.js';
 import {
   formatDateTime,
@@ -14,6 +15,8 @@ import {
   extractToolCalls,
   getFenceForContent,
   summarizeToolCall,
+  parseTaskNotification,
+  formatTaskNotification,
 } from '../utils/format.js';
 import {
   isRealUserInput,
@@ -21,6 +24,8 @@ import {
   extractUserText,
   isSkillLoading,
   isSlashCommand,
+  isCompactSummary,
+  isTaskNotification,
 } from '../utils/noise-filter.js';
 import { t, type Language } from '../utils/i18n.js';
 
@@ -121,6 +126,14 @@ function groupMessagesByTurn(messages: MessageRecord[]): ConversationTurn[] {
     const userMsg = msg as UserMessage;
     const userText = cleanUserInput(extractUserText(userMsg));
 
+    // 检测用户输入类型
+    let userInputType: UserInputType = 'normal';
+    if (isCompactSummary(userMsg)) {
+      userInputType = 'compacted';
+    } else if (isTaskNotification(userMsg)) {
+      userInputType = 'agent';
+    }
+
     // 收集后续的 assistant 响应
     i++;
     const assistantTexts: string[] = [];
@@ -153,6 +166,7 @@ function groupMessagesByTurn(messages: MessageRecord[]): ConversationTurn[] {
       turnNumber,
       timestamp: new Date(userMsg.timestamp),
       userInput: userText,
+      userInputType,
       assistantResponse: {
         text: assistantTexts.join('\n\n'),
         thinkings,
@@ -172,14 +186,35 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions, lang: Langua
   lines.push(`## ${t('turn', lang)} ${turn.turnNumber} (${timestamp})`);
   lines.push('');
 
-  // 用户输入
-  lines.push(`### ${t('userInput', lang)}`);
+  // 用户输入（带类型标注）
+  let userInputLabel = t('userInput', lang);
+  if (turn.userInputType === 'compacted') {
+    userInputLabel += ` [${t('compacted', lang)}]`;
+  } else if (turn.userInputType === 'agent') {
+    userInputLabel += ` [${t('agent', lang)}]`;
+  }
+  lines.push(`### ${userInputLabel}`);
   lines.push('');
   if (turn.userInput) {
-    const userFence = getFenceForContent(turn.userInput);
-    lines.push(userFence);
-    lines.push(turn.userInput);
-    lines.push(userFence);
+    // Task Notification 使用格式化输出
+    if (turn.userInputType === 'agent') {
+      const taskData = parseTaskNotification(turn.userInput);
+      if (taskData) {
+        lines.push(formatTaskNotification(taskData, lang));
+      } else {
+        // 解析失败时回退到原始内容
+        const userFence = getFenceForContent(turn.userInput);
+        lines.push(userFence);
+        lines.push(turn.userInput);
+        lines.push(userFence);
+      }
+    } else {
+      // 普通消息和 Compact Summary 保持原样
+      const userFence = getFenceForContent(turn.userInput);
+      lines.push(userFence);
+      lines.push(turn.userInput);
+      lines.push(userFence);
+    }
   } else {
     lines.push(t('emptyInput', lang));
   }
