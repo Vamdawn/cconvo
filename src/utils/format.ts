@@ -8,6 +8,17 @@ import type {
   ToolUseBlock,
   ToolResultBlock,
 } from '../models/types.js';
+import { t, type Language } from './i18n.js';
+
+// Task Notification 解析结果
+export interface TaskNotificationData {
+  taskId: string;
+  status: string;
+  summary: string;
+  result: string;
+  usage: string;
+  transcript: string;
+}
 
 // 格式化日期时间
 export function formatDateTime(date: Date | string): string {
@@ -208,4 +219,64 @@ export function formatDuration(ms: number): string {
   } else {
     return `${seconds}s`;
   }
+}
+
+// 解析 Task Notification 内容
+export function parseTaskNotification(content: string): TaskNotificationData | null {
+  if (!content.trim().startsWith('<task-notification>')) {
+    return null;
+  }
+
+  const extractTag = (tag: string): string => {
+    const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`);
+    const match = content.match(regex);
+    return match ? match[1].trim() : '';
+  };
+
+  // 提取 transcript 路径（在 </task-notification> 之后）
+  const transcriptMatch = content.match(/Full transcript available at:\s*(.+)/);
+  const transcript = transcriptMatch ? transcriptMatch[1].trim() : '';
+
+  return {
+    taskId: extractTag('task-id'),
+    status: extractTag('status'),
+    summary: extractTag('summary'),
+    result: extractTag('result'),
+    usage: extractTag('usage'),
+    transcript,
+  };
+}
+
+// 格式化 Task Notification 为 Markdown
+export function formatTaskNotification(data: TaskNotificationData, lang: Language): string {
+  const lines: string[] = [];
+
+  // 表格头部
+  lines.push('| Field | Value |');
+  lines.push('|-------|-------|');
+  lines.push(`| **${t('taskId', lang)}** | ${data.taskId} |`);
+  lines.push(`| **${t('taskStatus', lang)}** | ${data.status} |`);
+  lines.push(`| **${t('taskSummary', lang)}** | ${data.summary} |`);
+  lines.push('');
+
+  // 结果内容
+  if (data.result) {
+    lines.push(`**${t('taskResult', lang)}:**`);
+    lines.push('');
+    lines.push(data.result);
+    lines.push('');
+  }
+
+  // 用量信息
+  if (data.usage) {
+    lines.push(`**${t('taskUsage', lang)}:** ${data.usage.replace(/\n/g, ', ')}`);
+    lines.push('');
+  }
+
+  // Transcript 路径
+  if (data.transcript) {
+    lines.push(`**${t('taskTranscript', lang)}:** \`${data.transcript}\``);
+  }
+
+  return lines.join('\n');
 }
