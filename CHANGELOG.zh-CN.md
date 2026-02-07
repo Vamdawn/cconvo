@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-02-07
+
+### Changed
+
+- ✨ Markdown 导出所有代码围栏添加 `markdown` 语言标识
+  - 用户输入、Claude 回复、思考内容、子Agent回复均使用 ` ```markdown ` 开头
+  - `getFenceForContent` 支持可选语言标识参数
+
 ## [1.7.0] - 2026-02-06
 
 ### Added
