@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- ✨ Markdown 导出代码围栏添加 `markdown` 语言标识
+  - 用户输入、Claude 回复、思考内容、子Agent回复均使用 ` ```markdown ` 开头
+
 ## [1.7.0] - 2026-02-06
 
 ### Added
