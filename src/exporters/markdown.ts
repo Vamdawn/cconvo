@@ -203,17 +203,15 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions, lang: Langua
         lines.push(formatTaskNotification(taskData, lang));
       } else {
         // 解析失败时回退到原始内容
-        const userFence = getFenceForContent(turn.userInput);
-        lines.push(userFence);
+        lines.push(getFenceForContent(turn.userInput, 'markdown'));
         lines.push(turn.userInput);
-        lines.push(userFence);
+        lines.push(getFenceForContent(turn.userInput));
       }
     } else {
       // 普通消息和 Compact Summary 保持原样
-      const userFence = getFenceForContent(turn.userInput);
-      lines.push(userFence);
+      lines.push(getFenceForContent(turn.userInput, 'markdown'));
       lines.push(turn.userInput);
-      lines.push(userFence);
+      lines.push(getFenceForContent(turn.userInput));
     }
   } else {
     lines.push(t('emptyInput', lang));
@@ -230,10 +228,9 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions, lang: Langua
     lines.push(`<summary>${t('thinking', lang)}</summary>`);
     lines.push('');
     for (const thinking of turn.assistantResponse.thinkings) {
-      const fence = getFenceForContent(thinking);
-      lines.push(fence);
+      lines.push(getFenceForContent(thinking, 'markdown'));
       lines.push(thinking);
-      lines.push(fence);
+      lines.push(getFenceForContent(thinking));
       lines.push('');
     }
     lines.push('</details>');
@@ -274,10 +271,9 @@ function formatTurn(turn: ConversationTurn, options: ExportOptions, lang: Langua
 
   // 文本内容
   if (turn.assistantResponse.text) {
-    const responseFence = getFenceForContent(turn.assistantResponse.text);
-    lines.push(responseFence);
+    lines.push(getFenceForContent(turn.assistantResponse.text, 'markdown'));
     lines.push(turn.assistantResponse.text);
-    lines.push(responseFence);
+    lines.push(getFenceForContent(turn.assistantResponse.text));
   }
 
   // 如果完全没有输出（无 thinking、tool calls、text），显示提示
