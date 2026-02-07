@@ -264,10 +264,9 @@ export function formatTaskNotification(data: TaskNotificationData, lang: Languag
   if (data.result) {
     lines.push(`**${t('taskResult', lang)}:**`);
     lines.push('');
-    const resultFence = getFenceForContent(data.result);
-    lines.push(resultFence);
+    lines.push(getFenceForContent(data.result, 'markdown'));
     lines.push(data.result);
-    lines.push(resultFence);
+    lines.push(getFenceForContent(data.result));
     lines.push('');
   }
 

@@ -44,7 +44,7 @@ describe('formatTaskNotification', () => {
     expect(formatted).toContain('| **Status** | completed |');
     expect(formatted).toContain('**Result:**');
     // result 应使用代码围栏包裹
-    expect(formatted).toContain('```\nDone\n```');
+    expect(formatted).toContain('```markdown\nDone\n```');
   });
 
   it('应正确格式化为中文', () => {
