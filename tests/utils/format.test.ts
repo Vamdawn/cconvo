@@ -117,6 +117,14 @@ describe('getFenceForContent', () => {
     expect(getFenceForContent('code with ``` inside')).toBe('````');
     expect(getFenceForContent('code with ```` inside')).toBe('`````');
   });
+
+  it('应支持语言标识参数', () => {
+    expect(getFenceForContent('normal text', 'markdown')).toBe('```markdown');
+  });
+
+  it('语言标识应与动态围栏长度配合', () => {
+    expect(getFenceForContent('code with ``` inside', 'markdown')).toBe('````markdown');
+  });
 });
 
 describe('formatDuration', () => {

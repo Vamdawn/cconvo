@@ -137,7 +137,7 @@ export function escapeMarkdown(text: string): string {
 }
 
 // 根据内容生成合适的代码围栏
-export function getFenceForContent(text: string): string {
+export function getFenceForContent(text: string, lang?: string): string {
   let maxBackticks = 0;
   let current = 0;
 
@@ -152,7 +152,8 @@ export function getFenceForContent(text: string): string {
 
   // 使用比内容中最长反引号序列多一个的数量，最少 3 个
   const fenceCount = Math.max(3, maxBackticks + 1);
-  return '`'.repeat(fenceCount);
+  const fence = '`'.repeat(fenceCount);
+  return lang ? fence + lang : fence;
 }
 
 // 工具调用摘要
