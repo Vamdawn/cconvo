@@ -8,6 +8,7 @@ import { showInteractiveList, type ListItem } from './components/interactive-lis
 import { t, type Language } from './utils/i18n.js';
 import { formatSize } from './utils/format.js';
 import { getLanguage, setLanguage } from './utils/settings.js';
+import { showLLMConfig } from './llm/config-ui.js';
 
 // 当前语言（从配置加载）
 let currentLang: Language = getLanguage();
@@ -226,6 +227,11 @@ async function showSettings(): Promise<void> {
         label: `${t('language', currentLang)}: ${currentLanguageName}`,
         description: ''
       },
+      {
+        id: 'llm',
+        label: t('llmConfig', currentLang),
+        description: ''
+      },
     ];
 
     const result = await showInteractiveList({
@@ -243,8 +249,12 @@ async function showSettings(): Promise<void> {
       return;
     }
 
-    if (result.action === 'select' && result.item?.id === 'language') {
-      await showLanguageSettings();
+    if (result.action === 'select') {
+      if (result.item?.id === 'language') {
+        await showLanguageSettings();
+      } else if (result.item?.id === 'llm') {
+        await showLLMConfig(currentLang);
+      }
     }
   }
 }

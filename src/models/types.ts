@@ -229,3 +229,63 @@ export interface ProjectStats {
   tokens: TokenUsage;
   size: number;
 }
+
+// LLM 供应商标识
+export type LLMProviderType = 'openai' | 'anthropic' | 'custom';
+
+// LLM 供应商配置
+export interface LLMProvider {
+  name: string;
+  provider: LLMProviderType;
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+}
+
+// LLM 配置（存储在 settings 中）
+export interface LLMConfig {
+  active: string;
+  providers: LLMProvider[];
+}
+
+// Chat 消息
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+// LLM 调用选项
+export interface ChatCompletionOptions {
+  messages: ChatMessage[];
+  stream?: boolean;
+  temperature?: number;
+  maxTokens?: number;
+}
+
+// 流式回调
+export type StreamCallback = (chunk: string) => void;
+
+// 本地统计结果
+export interface ConversationStats {
+  totalTurns: number;
+  totalDuration: number;
+  toolUsage: { name: string; count: number; percentage: number }[];
+  tokenBreakdown: {
+    totalInput: number;
+    totalOutput: number;
+    cacheCreation: number;
+    cacheRead: number;
+    cacheHitRate: number;
+  };
+  fileOperations: { file: string; count: number }[];
+  perTurnTokens: { turn: number; input: number; output: number }[];
+}
+
+// 分析结果
+export interface AnalysisResult {
+  timeline: string;
+  patterns: string;
+  knowledge: string;
+  quality: string;
+  stats: ConversationStats;
+}

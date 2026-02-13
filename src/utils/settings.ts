@@ -2,10 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import type { Language } from './i18n.js';
+import type { LLMConfig, LLMProvider } from '../models/types.js';
 
 // 配置类型
 export interface Settings {
   language: Language;
+  llm?: LLMConfig;
 }
 
 // 默认配置
@@ -63,4 +65,71 @@ export function setLanguage(lang: Language): void {
   const settings = loadSettings();
   settings.language = lang;
   saveSettings(settings);
+}
+
+// 获取 LLM 配置
+export function getLLMConfig(): LLMConfig | undefined {
+  return loadSettings().llm;
+}
+
+// 保存 LLM 配置
+export function saveLLMConfig(llmConfig: LLMConfig): void {
+  const settings = loadSettings();
+  settings.llm = llmConfig;
+  saveSettings(settings);
+}
+
+// 获取当前活跃的 LLM 供应商
+export function getActiveLLMProvider(): LLMProvider | undefined {
+  const config = getLLMConfig();
+  if (!config) return undefined;
+  return config.providers.find(p => p.name === config.active);
+}
+
+// 添加 LLM 供应商
+export function addLLMProvider(provider: LLMProvider, setActive: boolean = false): void {
+  const settings = loadSettings();
+  if (!settings.llm) {
+    settings.llm = { active: '', providers: [] };
+  }
+  settings.llm.providers.push(provider);
+  if (setActive || settings.llm.providers.length === 1) {
+    settings.llm.active = provider.name;
+  }
+  saveSettings(settings);
+}
+
+// 删除 LLM 供应商
+export function removeLLMProvider(name: string): void {
+  const settings = loadSettings();
+  if (!settings.llm) return;
+  settings.llm.providers = settings.llm.providers.filter(p => p.name !== name);
+  if (settings.llm.active === name) {
+    settings.llm.active = settings.llm.providers[0]?.name || '';
+  }
+  saveSettings(settings);
+}
+
+// 更新 LLM 供应商
+export function updateLLMProvider(name: string, updated: LLMProvider): void {
+  const settings = loadSettings();
+  if (!settings.llm) return;
+  const index = settings.llm.providers.findIndex(p => p.name === name);
+  if (index === -1) return;
+  settings.llm.providers[index] = updated;
+  // 如果修改了名称，需要更新 active 引用
+  if (settings.llm.active === name) {
+    settings.llm.active = updated.name;
+  }
+  saveSettings(settings);
+}
+
+// 设置活跃供应商
+export function setActiveLLMProvider(name: string): void {
+  const settings = loadSettings();
+  if (!settings.llm) return;
+  if (settings.llm.providers.some(p => p.name === name)) {
+    settings.llm.active = name;
+    saveSettings(settings);
+  }
 }
