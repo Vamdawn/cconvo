@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- ✨ Add AI Analysis feature for conversations via LLM API
+  - Timeline summary, usage pattern analysis, knowledge extraction, and quality assessment
+  - Streaming output to terminal with optional Markdown file export
+  - Press `[a]` in conversation list to trigger analysis
+- ✨ Add LLM multi-provider configuration management
+  - Support OpenAI-compatible and Anthropic native protocols
+  - Preset providers: OpenAI, Anthropic, Deepseek, plus custom provider
+  - Connection testing, edit, delete, and active provider switching
+  - New "LLM Configuration" entry in Settings menu
+- ✨ Add local conversation statistics computation
+  - Tool usage statistics, token consumption breakdown, file operation hotspots, per-turn token tracking
+
 ## [1.7.1] - 2026-02-07
 
 ### Changed
