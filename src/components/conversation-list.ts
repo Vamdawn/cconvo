@@ -1,13 +1,15 @@
 // src/components/conversation-list.ts
 import chalk from 'chalk';
 import readline from 'readline';
+import { writeFile } from 'fs/promises';
 import { formatDateTime, formatSize, formatTokens, formatDuration } from '../utils/format.js';
 import { t, type Language } from '../utils/i18n.js';
 import { exportConversation, getFileExtension } from '../exporters/index.js';
 import { parseConversation } from '../core/parser.js';
+import { analyzeConversation, formatAnalysisResult } from '../llm/analyzer.js';
 import type { Project, ConversationSummary, ExportOptions } from '../models/types.js';
 import { showBanner } from './banner.js';
-import { getLanguage } from '../utils/settings.js';
+import { getLanguage, getActiveLLMProvider } from '../utils/settings.js';
 
 // 获取当前语言
 function getLang(): Language {
@@ -63,6 +65,79 @@ function renderInfoPanel(conv: ConversationSummary): void {
   console.log(` ${chalk.gray(t('firstMessage', lang) + ':')}`);
   console.log(` ${chalk.dim(conv.firstUserMessage || t('none', lang))}`);
   console.log(chalk.gray(line));
+}
+
+// AI 分析
+async function performAnalysis(
+  project: Project,
+  conv: ConversationSummary
+): Promise<void> {
+  const lang = getLang();
+  const provider = getActiveLLMProvider();
+
+  // 检查 LLM 配置
+  if (!provider) {
+    console.log(chalk.yellow(`\n  ${t('llmNotConfigured', lang)}`));
+    await waitForKeypress();
+    return;
+  }
+
+  // 解析完整会话
+  const conversation = await parseConversation(conv.filePath, project.originalPath);
+
+  if (conversation.messages.length === 0) {
+    console.log(chalk.yellow(`\n  ${t('analysisNoData', lang)}`));
+    await waitForKeypress();
+    return;
+  }
+
+  console.log();
+
+  // 定义分析阶段名称
+  const phaseNames: Record<string, string> = {
+    timeline: t('analysisTimeline', lang),
+    patterns: t('analysisPatterns', lang),
+    knowledge: t('analysisKnowledge', lang),
+    quality: t('analysisQuality', lang),
+  };
+
+  let currentPhase = '';
+
+  try {
+    // 流式输出分析结果
+    const result = await analyzeConversation(
+      conversation,
+      provider,
+      lang,
+      (phase, chunk) => {
+        if (phase !== currentPhase) {
+          currentPhase = phase;
+          console.log();
+          console.log(chalk.bold.cyan(`  ── ${phaseNames[phase] || phase} ──`));
+          console.log();
+        }
+        process.stdout.write(chunk);
+      }
+    );
+
+    console.log('\n');
+
+    // 询问是否保存
+    console.log(`  ${t('analysisSavePrompt', lang)} [y/n]`);
+    const key = await waitForKeypress();
+
+    if (key.toLowerCase() === 'y') {
+      const markdown = formatAnalysisResult(result, conversation, lang);
+      const outputPath = `${conv.slug || conv.sessionId}-analysis.md`;
+      await writeFile(outputPath, markdown, 'utf-8');
+      console.log(chalk.green(`  ✓ ${t('analysisSaved', lang)} ${outputPath}`));
+      await waitForKeypress();
+    }
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.log(chalk.red(`\n  Error: ${errMsg}`));
+    await waitForKeypress();
+  }
 }
 
 // 快速导出（使用默认格式 Markdown）
@@ -353,6 +428,16 @@ export async function showConversationList(
                   process.stdin.removeListener('keypress', handleKeypress);
                   process.stdin.setRawMode(false);
                   await exportWithOptions(project, filteredConversations[selectedIndex]);
+                  process.stdin.setRawMode(true);
+                  process.stdin.on('keypress', handleKeypress);
+                  renderList(project, filteredConversations, selectedIndex, searchTerm);
+                }
+                break;
+              case 'a':
+                if (filteredConversations.length > 0) {
+                  process.stdin.removeListener('keypress', handleKeypress);
+                  process.stdin.setRawMode(false);
+                  await performAnalysis(project, filteredConversations[selectedIndex]);
                   process.stdin.setRawMode(true);
                   process.stdin.on('keypress', handleKeypress);
                   renderList(project, filteredConversations, selectedIndex, searchTerm);
