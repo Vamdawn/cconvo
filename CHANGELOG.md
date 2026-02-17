@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-02-17
+
 ### Changed
 - ♻️ `cconvo` 无参数启动时默认直接进入主界面，不再自动检测当前目录项目
 
