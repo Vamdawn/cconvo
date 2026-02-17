@@ -56,6 +56,7 @@ const messages: Record<Language, Record<string, string>> = {
     // 加载提示
     detectingProject: 'Detecting current project...',
     detectedProject: 'Detected project',
+    noProjectDetected: 'No project found for current directory, entering main menu...',
     loadingProjects: 'Loading projects...',
     calculatingStats: 'Calculating statistics...',
     goodbye: 'Goodbye!',
@@ -214,6 +215,7 @@ const messages: Record<Language, Record<string, string>> = {
     // 加载提示
     detectingProject: '正在检测当前项目...',
     detectedProject: '检测到项目',
+    noProjectDetected: '当前目录未找到项目，进入主界面...',
     loadingProjects: '正在加载项目...',
     calculatingStats: '正在计算统计...',
     goodbye: '再见！',

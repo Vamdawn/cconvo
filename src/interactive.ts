@@ -66,36 +66,44 @@ async function waitForAnyKey(): Promise<void> {
   });
 }
 
+// 交互式启动选项
+interface InteractiveOptions {
+  /** 是否检测当前目录项目 */
+  detectProject?: boolean;
+}
+
 // 交互式主程序
-export async function runInteractive(): Promise<void> {
+export async function runInteractive(options: InteractiveOptions = {}): Promise<void> {
   showBanner();
 
-  // 检测当前目录是否为已记录的项目
-  const cwd = process.cwd();
-  const spinner = ora(t('detectingProject', currentLang)).start();
-  const currentProject = await findProjectByPath(cwd);
+  if (options.detectProject) {
+    // 检测当前目录是否为已记录的项目
+    const cwd = process.cwd();
+    const spinner = ora(t('detectingProject', currentLang)).start();
+    const currentProject = await findProjectByPath(cwd);
 
-  if (currentProject && currentProject.conversations.length > 0) {
-    spinner.succeed(`${t('detectedProject', currentLang)}: ${currentProject.name} (${currentProject.conversations.length} ${t('conversations', currentLang)})`);
+    if (currentProject && currentProject.conversations.length > 0) {
+      spinner.succeed(`${t('detectedProject', currentLang)}: ${currentProject.name} (${currentProject.conversations.length} ${t('conversations', currentLang)})`);
 
-    // 循环显示对话列表，直到用户选择退出或返回主菜单
-    while (true) {
-      const result = await showConversationList(currentProject);
+      // 循环显示对话列表，直到用户选择退出或返回主菜单
+      while (true) {
+        const result = await showConversationList(currentProject);
 
-      if (result.action === 'quit') {
-        console.log(chalk.gray(`\n${t('goodbye', currentLang)}`));
-        return;
+        if (result.action === 'quit') {
+          console.log(chalk.gray(`\n${t('goodbye', currentLang)}`));
+          return;
+        }
+
+        if (result.action === 'main') {
+          // 跳出循环，继续显示主菜单
+          break;
+        }
+
+        // result.action === 'back' 时继续循环，返回对话列表
       }
-
-      if (result.action === 'main') {
-        // 跳出循环，继续显示主菜单
-        break;
-      }
-
-      // result.action === 'back' 时继续循环，返回对话列表
+    } else {
+      spinner.info(t('noProjectDetected', currentLang));
     }
-  } else {
-    spinner.stop();
   }
 
   // 主菜单循环

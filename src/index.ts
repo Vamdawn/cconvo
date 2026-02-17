@@ -4,9 +4,14 @@ import { program } from './cli.js';
 import { runInteractive } from './interactive.js';
 
 async function main(): Promise<void> {
-  // 如果没有子命令，进入交互式模式
-  if (process.argv.length <= 2) {
+  const args = process.argv.slice(2);
+
+  if (args.length === 0) {
+    // 无参数，进入主界面
     await runInteractive();
+  } else if (args.length === 1 && args[0] === '.') {
+    // cconvo . → 直接进入当前目录项目
+    await runInteractive({ detectProject: true });
   } else {
     program.parse();
   }
