@@ -10,6 +10,7 @@ import { analyzeConversation, formatAnalysisResult } from '../llm/analyzer.js';
 import type { Project, ConversationSummary, ExportOptions } from '../models/types.js';
 import { showBanner } from './banner.js';
 import { getLanguage, getActiveLLMProvider } from '../utils/settings.js';
+import { waitForKeypress, isCtrlC } from '../utils/terminal.js';
 
 // 获取当前语言
 function getLang(): Language {
@@ -200,18 +201,6 @@ async function exportWithOptions(
   await waitForKeypress();
 }
 
-// 等待按键
-function waitForKeypress(): Promise<string> {
-  return new Promise(resolve => {
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
-    process.stdin.once('data', (data) => {
-      process.stdin.setRawMode(false);
-      resolve(data.toString());
-    });
-  });
-}
-
 // 滚动清屏（将内容推上去而非截断）
 function scrollClear(): void {
   const rows = process.stdout.rows || 24;
@@ -321,6 +310,15 @@ export async function showConversationList(
 
   return new Promise(resolve => {
     const handleKeypress = async (str: string | undefined, key: readline.Key) => {
+      // Ctrl+C 安全退出
+      if (isCtrlC(str, key)) {
+        process.stdin.removeListener('keypress', handleKeypress);
+        process.stdin.setRawMode(false);
+        process.stdin.pause();
+        resolve({ action: 'quit' });
+        return;
+      }
+
       // 计算可见行数用于翻页
       const infoBoxHeight = 10;
       const headerHeight = 8 + (searchTerm ? 2 : 0);

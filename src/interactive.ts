@@ -9,6 +9,7 @@ import { t, type Language } from './utils/i18n.js';
 import { formatSize } from './utils/format.js';
 import { getLanguage, setLanguage } from './utils/settings.js';
 import { showLLMConfig } from './llm/config-ui.js';
+import { waitForKeypress, exitApp } from './utils/terminal.js';
 
 // 当前语言（从配置加载）
 let currentLang: Language = getLanguage();
@@ -52,18 +53,6 @@ async function showMainMenu(): Promise<'browse' | 'stats' | 'settings' | 'quit' 
   }
 
   return result.item?.id as 'browse' | 'stats' | 'settings';
-}
-
-// 等待任意键
-async function waitForAnyKey(): Promise<void> {
-  return new Promise(resolve => {
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
-    process.stdin.once('data', () => {
-      process.stdin.setRawMode(false);
-      resolve();
-    });
-  });
 }
 
 // 交互式启动选项
@@ -138,7 +127,7 @@ async function browseProjects(): Promise<NavigationResult> {
 
   if (result.projects.length === 0) {
     console.log(chalk.yellow(`\n${t('noProjects', currentLang)}\n`));
-    await waitForAnyKey();
+    await waitForKeypress();
     return 'back';
   }
 
@@ -157,7 +146,7 @@ async function browseProjects(): Promise<NavigationResult> {
   });
 
   if (listResult.action === 'quit') {
-    process.exit(0);
+    exitApp();
   }
 
   if (listResult.action === 'back' || listResult.action === 'main') {
@@ -178,7 +167,7 @@ async function browseConversations(project: Project): Promise<NavigationResult> 
     const result = await showConversationList(project);
 
     if (result.action === 'quit') {
-      process.exit(0);
+      exitApp();
     }
 
     if (result.action === 'main') {
@@ -221,7 +210,7 @@ async function showStatistics(): Promise<void> {
   console.log();
   console.log(chalk.gray(`  ${t('pressAnyKeyToReturn', currentLang)}`));
 
-  await waitForAnyKey();
+  await waitForKeypress();
 }
 
 // 显示设置菜单
@@ -250,7 +239,7 @@ async function showSettings(): Promise<void> {
     });
 
     if (result.action === 'quit') {
-      process.exit(0);
+      exitApp();
     }
 
     if (result.action === 'back' || result.action === 'main') {
@@ -285,7 +274,7 @@ async function showLanguageSettings(): Promise<void> {
   });
 
   if (result.action === 'quit') {
-    process.exit(0);
+    exitApp();
   }
 
   if (result.action === 'select' && result.item) {

@@ -11,6 +11,7 @@ import {
 } from '../utils/settings.js';
 import { testConnection } from './client.js';
 import { showInteractiveList } from '../components/interactive-list.js';
+import { waitForKeypress } from '../utils/terminal.js';
 import type { LLMProvider, LLMProviderType } from '../models/types.js';
 
 // 预设供应商
@@ -234,14 +235,7 @@ async function showProviderActions(providerName: string, lang: Language): Promis
         spinner.fail(t('llmTestFailed', lang));
       }
       // 等待用户按键返回
-      await new Promise<void>(resolve => {
-        process.stdin.setRawMode(true);
-        process.stdin.resume();
-        process.stdin.once('data', () => {
-          process.stdin.setRawMode(false);
-          resolve();
-        });
-      });
+      await waitForKeypress();
       break;
     }
     case 'delete': {

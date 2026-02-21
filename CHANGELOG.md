@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- ♻️ 集中化终端状态管理，消除四处重复的 `waitForKeypress` 实现，统一收口到 `src/utils/terminal.ts`
+- ♻️ 所有交互模块的 `process.exit(0)` 替换为 `exitApp()`，确保退出前重置终端状态
+
+### Fixed
+- 🐛 修复 raw mode 下按 Ctrl+C 无响应、终端状态残留不可用的问题
+
 ## [1.8.1] - 2026-02-17
 
 ### Changed

@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import readline from 'readline';
 import { showBanner } from './banner.js';
 import { t, type Language } from '../utils/i18n.js';
+import { waitForKeypress, isCtrlC } from '../utils/terminal.js';
 
 // 列表项
 export interface ListItem {
@@ -42,18 +43,6 @@ function scrollClear(): void {
   const rows = process.stdout.rows || 24;
   console.log('\n'.repeat(rows));
   process.stdout.write('\x1b[H');
-}
-
-// 等待按键
-function waitForKeypress(): Promise<string> {
-  return new Promise(resolve => {
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
-    process.stdin.once('data', (data) => {
-      process.stdin.setRawMode(false);
-      resolve(data.toString());
-    });
-  });
 }
 
 // 构建快捷键提示
@@ -174,6 +163,13 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
     };
 
     const handleKeypress = async (str: string | undefined, key: readline.Key) => {
+      // Ctrl+C 安全退出
+      if (isCtrlC(str, key)) {
+        process.stdin.pause();
+        cleanup({ action: 'quit' });
+        return;
+      }
+
       // 搜索模式
       if (searchTerm !== '' || key.name === 'slash' || str === '/') {
         if (key.name === 'escape') {

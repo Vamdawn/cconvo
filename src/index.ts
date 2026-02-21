@@ -2,8 +2,10 @@
 
 import { program } from './cli.js';
 import { runInteractive } from './interactive.js';
+import { registerSigintHandler } from './utils/terminal.js';
 
 async function main(): Promise<void> {
+  registerSigintHandler();
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
