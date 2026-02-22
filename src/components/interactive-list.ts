@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import readline from 'readline';
 import { showBanner } from './banner.js';
 import { t, type Language } from '../utils/i18n.js';
-import { waitForKeypress, isCtrlC, clearScreen } from '../utils/terminal.js';
+import { waitForKeypress, isCtrlC, beginRender, printLine, flushRender } from '../utils/terminal.js';
 
 // 列表项
 export interface ListItem {
@@ -50,16 +50,28 @@ function buildShortcutsHint(shortcuts: ListShortcut[], isSearchMode: boolean, la
   return chalk.gray(customHints ? `${customHints}  ${baseHints}` : baseHints);
 }
 
+// 动态计算列表可见项数
+function computeMaxVisible(config: ListConfig, searchTerm: string | null): number {
+  const termRows = process.stdout.rows || 24;
+  const bannerHeight = config.showBanner !== false ? 6 : 0;
+  const titleHeight = 2;
+  const searchHeight = searchTerm !== null ? 2 : 0;
+  const footerHeight = 2;  // 空行 + 快捷键
+  const overhead = bannerHeight + titleHeight + searchHeight + footerHeight;
+  const dynamicMax = Math.max(3, termRows - overhead);
+  return Math.min(config.maxVisible || 15, dynamicMax);
+}
+
 // 渲染列表
 function renderList(
   config: ListConfig,
   items: ListItem[],
   selectedIndex: number,
-  searchTerm: string,
+  searchTerm: string | null,
   shortcuts: ListShortcut[],
   lang: Language
 ): void {
-  clearScreen();
+  beginRender();
 
   if (config.showBanner !== false) {
     showBanner();
@@ -68,21 +80,20 @@ function renderList(
   // 标题和计数
   const count = items.length;
   const countText = config.showCount !== false ? chalk.gray(` (${count})`) : '';
-  console.log(chalk.bold(`  ${config.title}`) + countText);
-  console.log();
+  printLine(chalk.bold(`  ${config.title}`) + countText);
+  printLine();
 
   // 搜索状态
-  if (searchTerm) {
-    console.log(chalk.cyan(`  ${t('searchPlaceholder', lang)}: ${searchTerm}_`));
-    console.log();
+  if (searchTerm !== null) {
+    printLine(chalk.cyan(`  ${t('searchPlaceholder', lang)}: ${searchTerm}_`));
+    printLine();
   }
 
-  // 列表项
-  const maxVisible = config.maxVisible || 15;
+  const maxVisible = computeMaxVisible(config, searchTerm);
   const showIndex = config.showIndex !== false;
 
   if (items.length === 0) {
-    console.log(chalk.yellow(`  ${config.emptyMessage || t('noData', lang)}`));
+    printLine(chalk.yellow(`  ${config.emptyMessage || t('noData', lang)}`));
   } else {
     // 计算滚动视口的起始位置，确保选中项始终可见
     let startIndex = 0;
@@ -93,7 +104,7 @@ function renderList(
 
     // 显示上方省略提示
     if (startIndex > 0) {
-      console.log(chalk.gray(`  ... ${startIndex} ${t('moreItemsAbove', lang)}`));
+      printLine(chalk.gray(`  ... ${startIndex} ${t('moreItemsAbove', lang)}`));
     }
 
     for (let i = startIndex; i < endIndex; i++) {
@@ -104,27 +115,29 @@ function renderList(
       const line = `  ${prefix}${marker}${item.label}${desc}`;
 
       if (i === selectedIndex) {
-        console.log(chalk.bgBlue.white(line));
+        printLine(chalk.bgBlue.white(line));
       } else {
-        console.log(line);
+        printLine(line);
       }
     }
 
     // 显示下方省略提示
     if (endIndex < items.length) {
-      console.log(chalk.gray(`  ... ${items.length - endIndex} ${t('moreItems', lang)}`));
+      printLine(chalk.gray(`  ... ${items.length - endIndex} ${t('moreItems', lang)}`));
     }
   }
 
   // 快捷键提示
-  console.log();
-  console.log(buildShortcutsHint(shortcuts, searchTerm !== '', lang));
+  printLine();
+  printLine(buildShortcutsHint(shortcuts, searchTerm !== null, lang));
+
+  flushRender();
 }
 
 // 主函数
 export async function showInteractiveList(config: ListConfig): Promise<ListResult> {
   let selectedIndex = 0;
-  let searchTerm = '';
+  let searchTerm: string | null = null;
   let filteredItems = [...config.items];
   const shortcuts = config.shortcuts || [];
   const lang = config.language || 'en';
@@ -164,9 +177,9 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
       }
 
       // 搜索模式
-      if (searchTerm !== '' || key.name === 'slash' || str === '/') {
+      if (searchTerm !== null) {
         if (key.name === 'escape') {
-          searchTerm = '';
+          searchTerm = null;
           filterItems();
           renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           return;
@@ -184,11 +197,7 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
           return;
         }
         if (str && str.length === 1 && !key.ctrl && !key.meta) {
-          if (str === '/' && searchTerm === '') {
-            renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
-            return;
-          }
-          searchTerm += str;
+          searchTerm = (searchTerm ?? '') + str;
           filterItems();
           renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           return;
@@ -209,7 +218,7 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
         case 'left':
           // 向上翻页
           {
-            const pageSize = config.maxVisible || 15;
+            const pageSize = computeMaxVisible(config, searchTerm);
             selectedIndex = Math.max(0, selectedIndex - pageSize);
             renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           }
@@ -217,7 +226,7 @@ export async function showInteractiveList(config: ListConfig): Promise<ListResul
         case 'right':
           // 向下翻页
           {
-            const pageSize = config.maxVisible || 15;
+            const pageSize = computeMaxVisible(config, searchTerm);
             selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + pageSize);
             renderList(config, filteredItems, selectedIndex, searchTerm, shortcuts, lang);
           }

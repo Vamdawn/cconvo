@@ -10,7 +10,7 @@ import { analyzeConversation, formatAnalysisResult } from '../llm/analyzer.js';
 import type { Project, ConversationSummary, ExportOptions } from '../models/types.js';
 import { showBanner } from './banner.js';
 import { getLanguage, getActiveLLMProvider } from '../utils/settings.js';
-import { waitForKeypress, isCtrlC, clearScreen } from '../utils/terminal.js';
+import { waitForKeypress, isCtrlC, beginRender, printLine, flushRender } from '../utils/terminal.js';
 
 // 获取当前语言
 function getLang(): Language {
@@ -35,37 +35,37 @@ function formatConversationItem(
   return `  ${(index + 1).toString().padStart(2)}. ${time}  ${title} (${msgs})`;
 }
 
-// 渲染信息面板
+// 渲染信息面板（10 行）
 function renderInfoPanel(conv: ConversationSummary): void {
   const lang = getLang();
   const width = Math.min(process.stdout.columns || 60, 60);
   const line = '─'.repeat(width);
 
-  console.log(chalk.gray(line));
-  console.log(chalk.bold(` ${t('conversationInfo', lang)}`));
-  console.log(chalk.gray(line));
+  printLine(chalk.gray(line));
+  printLine(chalk.bold(` ${t('conversationInfo', lang)}`));
+  printLine(chalk.gray(line));
 
   // 第一行：开始时间 + 时长
   const startTimeLabel = `${t('startTime', lang)}:`;
   const durationLabel = `${t('duration', lang)}:`;
-  console.log(` ${chalk.gray(startTimeLabel)} ${formatDateTime(conv.startTime)}    ${chalk.gray(durationLabel)} ${formatDuration(conv.duration)}`);
+  printLine(` ${chalk.gray(startTimeLabel)} ${formatDateTime(conv.startTime)}    ${chalk.gray(durationLabel)} ${formatDuration(conv.duration)}`);
 
   // 第二行：消息数量 + 文件大小
   const msgCountLabel = `${t('messageCount', lang)}:`;
   const sizeLabel = `${t('fileSize', lang)}:`;
-  console.log(` ${chalk.gray(msgCountLabel)} ${conv.messageCount}    ${chalk.gray(sizeLabel)} ${formatSize(conv.fileSize)}`);
+  printLine(` ${chalk.gray(msgCountLabel)} ${conv.messageCount}    ${chalk.gray(sizeLabel)} ${formatSize(conv.fileSize)}`);
 
   // 第三行：Token 统计
   const inputLabel = t('inputTokens', lang);
   const outputLabel = t('outputTokens', lang);
-  console.log(` ${chalk.gray('Token:')} ${inputLabel} ${formatTokens(conv.totalTokens.input_tokens)} / ${outputLabel} ${formatTokens(conv.totalTokens.output_tokens)}`);
+  printLine(` ${chalk.gray('Token:')} ${inputLabel} ${formatTokens(conv.totalTokens.input_tokens)} / ${outputLabel} ${formatTokens(conv.totalTokens.output_tokens)}`);
 
-  console.log(chalk.gray(line));
+  printLine(chalk.gray(line));
 
   // 首条消息
-  console.log(` ${chalk.gray(t('firstMessage', lang) + ':')}`);
-  console.log(` ${chalk.dim(conv.firstUserMessage || t('none', lang))}`);
-  console.log(chalk.gray(line));
+  printLine(` ${chalk.gray(t('firstMessage', lang) + ':')}`);
+  printLine(` ${chalk.dim(conv.firstUserMessage || t('none', lang))}`);
+  printLine(chalk.gray(line));
 }
 
 // AI 分析
@@ -208,32 +208,35 @@ function renderList(
   selectedIndex: number,
   searchTerm: string
 ): void {
-  clearScreen();
+  beginRender();
   showBanner();
 
   // 标题
   const deletedTag = project.isDeleted ? chalk.red(` [${t('deleted', getLang())}]`) : '';
-  console.log(chalk.bold.blue(`📁 ${project.name}`) + deletedTag);
-  console.log(chalk.gray(`  ${project.originalPath}`));
-  console.log(chalk.bold('─'.repeat(40)));
-  console.log();
+  printLine(chalk.bold.blue(`📁 ${project.name}`) + deletedTag);
+  printLine(chalk.gray(`  ${project.originalPath}`));
+  printLine(chalk.bold('─'.repeat(40)));
+  printLine();
 
   // 搜索栏
   if (searchTerm) {
-    console.log(chalk.cyan(`${t('searchPlaceholder', getLang())}: ${searchTerm}_`));
-    console.log();
+    printLine(chalk.cyan(`${t('searchPlaceholder', getLang())}: ${searchTerm}_`));
+    printLine();
   }
 
-  // 计算可用行数：终端高度 - banner(4) - 项目标题(3) - 信息面板(10) - 快捷键(2) - 搜索栏
-  const infoBoxHeight = 10;
-  const headerHeight = 8 + (searchTerm ? 2 : 0);
-  const footerHeight = 2;
-  const availableRows = (process.stdout.rows || 24) - headerHeight - infoBoxHeight - footerHeight;
-  const maxVisible = Math.max(5, Math.min(15, availableRows));
+  // 动态计算可见行数（修正：banner 实际为 6 行，非注释中的 4 行）
+  const termRows = process.stdout.rows || 24;
+  const bannerHeight = 6;
+  const projectHeaderHeight = 4;  // name + path + separator + empty
+  const searchHeight = searchTerm ? 2 : 0;
+  const infoBoxHeight = 10;       // renderInfoPanel 固定 10 行
+  const footerHeight = 2;         // 空行 + 快捷键
+  const overhead = bannerHeight + projectHeaderHeight + searchHeight + infoBoxHeight + footerHeight;
+  const maxVisible = Math.min(15, Math.max(3, termRows - overhead));
 
   // 对话列表
   if (conversations.length === 0) {
-    console.log(chalk.yellow(searchTerm ? t('noMatchingConversations', getLang()) : t('noConversationsFound', getLang())));
+    printLine(chalk.yellow(searchTerm ? t('noMatchingConversations', getLang()) : t('noConversationsFound', getLang())));
   } else {
     // 计算滚动视口的起始位置，确保选中项始终可见
     let startIndex = 0;
@@ -244,25 +247,25 @@ function renderList(
 
     // 显示上方省略提示
     if (startIndex > 0) {
-      console.log(chalk.gray(`  ... ${startIndex} ${t('moreItemsAbove', getLang())}`));
+      printLine(chalk.gray(`  ... ${startIndex} ${t('moreItemsAbove', getLang())}`));
     }
 
     for (let i = startIndex; i < endIndex; i++) {
       const line = formatConversationItem(i, conversations[i], getLang());
       if (i === selectedIndex) {
-        console.log(chalk.bgBlue.white(line));
+        printLine(chalk.bgBlue.white(line));
       } else {
-        console.log(line);
+        printLine(line);
       }
     }
 
     // 显示下方省略提示
     if (endIndex < conversations.length) {
-      console.log(chalk.gray(`  ... ${conversations.length - endIndex} ${t('more', getLang())}`));
+      printLine(chalk.gray(`  ... ${conversations.length - endIndex} ${t('more', getLang())}`));
     }
   }
 
-  console.log();
+  printLine();
 
   // 渲染信息面板
   if (conversations.length > 0) {
@@ -270,7 +273,9 @@ function renderList(
   }
 
   // 快捷键提示
-  console.log(chalk.gray(searchTerm ? t('shortcutsSearch', getLang()) : t('shortcuts', getLang())));
+  printLine(chalk.gray(searchTerm ? t('shortcutsSearch', getLang()) : t('shortcuts', getLang())));
+
+  flushRender();
 }
 
 // 主函数：显示对话列表
@@ -312,12 +317,15 @@ export async function showConversationList(
         return;
       }
 
-      // 计算可见行数用于翻页
+      // 计算可见行数用于翻页（与 renderList 保持一致）
+      const termRows = process.stdout.rows || 24;
+      const bannerHeight = 6;
+      const projectHeaderHeight = 4;
+      const searchHeight = searchTerm ? 2 : 0;
       const infoBoxHeight = 10;
-      const headerHeight = 8 + (searchTerm ? 2 : 0);
       const footerHeight = 2;
-      const availableRows = (process.stdout.rows || 24) - headerHeight - infoBoxHeight - footerHeight;
-      const maxVisible = Math.max(5, Math.min(15, availableRows));
+      const overhead = bannerHeight + projectHeaderHeight + searchHeight + infoBoxHeight + footerHeight;
+      const maxVisible = Math.min(15, Math.max(3, termRows - overhead));
 
       // 搜索模式下的按键处理
       if (searchTerm !== '') {

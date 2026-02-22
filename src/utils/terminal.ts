@@ -61,6 +61,7 @@ export function enterTUI(): void {
 export function exitTUI(): void {
   if (inTUI) {
     inTUI = false;
+    process.stdout.write('\x1b[?25h');   // 确保光标可见（防止隐藏状态泄漏到原始屏幕）
     process.stdout.write('\x1b[?1049l'); // 恢复原始屏幕
   }
 }
@@ -69,4 +70,46 @@ export function exitTUI(): void {
 export function clearScreen(): void {
   if (!process.stdout.isTTY) return;
   process.stdout.write('\x1b[2J\x1b[H'); // 擦除整屏 + 光标归位
+}
+
+// 屏幕渲染缓冲区（null 表示未处于缓冲渲染模式）
+let screenBuffer: string[] | null = null;
+
+// 开始缓冲渲染（后续 printLine 调用将写入缓冲区）
+// 若存在未 flush 的旧缓冲（如前次渲染异常中断），自动重置
+export function beginRender(): void {
+  screenBuffer = [];
+}
+
+// 输出一行：缓冲模式下写入缓冲区，否则直接 console.log
+export function printLine(text: string = ''): void {
+  if (screenBuffer !== null) {
+    screenBuffer.push(text);
+  } else {
+    console.log(text);
+  }
+}
+
+// 将缓冲区内容一次性写入屏幕，截断至终端高度，防止溢出滚动
+export function flushRender(): void {
+  if (screenBuffer === null) return;
+
+  if (!process.stdout.isTTY) {
+    process.stdout.write(screenBuffer.join('\n') + '\n');
+    screenBuffer = null;
+    return;
+  }
+
+  const maxRows = (process.stdout.rows || 24) - 1; // 留一行余量防止边界滚动
+  const lines = screenBuffer.slice(0, maxRows);
+
+  // 合并为单次写入，减少系统调用，确保原子更新
+  process.stdout.write(
+    '\x1b[?25l'
+    + '\x1b[H'
+    + lines.map(l => l + '\x1b[K').join('\n')
+    + '\x1b[J'
+  );
+
+  screenBuffer = null;
 }

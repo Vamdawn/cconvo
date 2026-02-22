@@ -12,10 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ♻️ 所有交互模块的 `process.exit(0)` 替换为 `exitApp()`，确保退出前重置终端状态
 - ♻️ TUI 清屏方式从滚动填充升级为备用屏幕缓冲区 + ANSI 擦除，消除滚动历史污染和视觉闪烁
 - ♻️ 统一所有清屏调用为集中式 `clearScreen()`，删除重复的 `scrollClear()` 和 `console.clear()`
+- ♻️ TUI 渲染改为缓冲模式（`beginRender`/`printLine`/`flushRender`），消除输出行数超终端高度时的滚动问题
+- ♻️ 列表可见项数动态适配终端尺寸，修正 banner 行高计算误差
 
 ### Fixed
 - 🐛 修复 raw mode 下按 Ctrl+C 无响应、终端状态残留不可用的问题
 - 🐛 修复 `cconvo .` 未检测到项目时提示信息一闪而过的问题
+- 🐛 修复交互列表搜索模式按 `/` 无法进入的问题
 
 ## [1.8.1] - 2026-02-17
 

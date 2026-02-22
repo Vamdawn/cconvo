@@ -9,7 +9,7 @@ import { t, type Language } from './utils/i18n.js';
 import { formatSize } from './utils/format.js';
 import { getLanguage, setLanguage } from './utils/settings.js';
 import { showLLMConfig } from './llm/config-ui.js';
-import { waitForKeypress, exitApp, clearScreen, enterTUI, exitTUI } from './utils/terminal.js';
+import { waitForKeypress, exitApp, enterTUI, exitTUI, beginRender, printLine, flushRender } from './utils/terminal.js';
 
 // 当前语言（从配置加载）
 let currentLang: Language = getLanguage();
@@ -190,30 +190,32 @@ async function showStatistics(): Promise<void> {
   const result = await scanProjects();
   spinner.stop();
 
-  clearScreen();
+  beginRender();
   showBanner();
 
-  console.log(chalk.bold(`  📊 ${t('statistics', currentLang)}`));
-  console.log();
-  console.log(`  ${chalk.gray(t('totalProjects', currentLang) + ':')}       ${chalk.cyan(result.projects.length)}`);
-  console.log(`  ${chalk.gray(t('totalConversations', currentLang) + ':')}       ${chalk.cyan(result.totalConversations)}`);
-  console.log(`  ${chalk.gray(t('totalSize', currentLang) + ':')}         ${chalk.cyan(formatSize(result.totalSize))}`);
-  console.log();
+  printLine(chalk.bold(`  📊 ${t('statistics', currentLang)}`));
+  printLine();
+  printLine(`  ${chalk.gray(t('totalProjects', currentLang) + ':')}       ${chalk.cyan(result.projects.length)}`);
+  printLine(`  ${chalk.gray(t('totalConversations', currentLang) + ':')}       ${chalk.cyan(result.totalConversations)}`);
+  printLine(`  ${chalk.gray(t('totalSize', currentLang) + ':')}         ${chalk.cyan(formatSize(result.totalSize))}`);
+  printLine();
 
   // Top 10 项目
-  console.log(chalk.bold(`  ${t('topProjectsBySize', currentLang)}:`));
-  console.log();
+  printLine(chalk.bold(`  ${t('topProjectsBySize', currentLang)}:`));
+  printLine();
 
   const sorted = [...result.projects].sort((a, b) => b.totalSize - a.totalSize).slice(0, 10);
 
   for (let i = 0; i < sorted.length; i++) {
     const p = sorted[i];
     const bar = '█'.repeat(Math.ceil((p.totalSize / result.totalSize) * 20));
-    console.log(`  ${(i + 1).toString().padStart(2)}. ${p.name.slice(0, 20).padEnd(20)} ${formatSize(p.totalSize).padStart(10)} ${chalk.blue(bar)}`);
+    printLine(`  ${(i + 1).toString().padStart(2)}. ${p.name.slice(0, 20).padEnd(20)} ${formatSize(p.totalSize).padStart(10)} ${chalk.blue(bar)}`);
   }
 
-  console.log();
-  console.log(chalk.gray(`  ${t('pressAnyKeyToReturn', currentLang)}`));
+  printLine();
+  printLine(chalk.gray(`  ${t('pressAnyKeyToReturn', currentLang)}`));
+
+  flushRender();
 
   await waitForKeypress();
 }
