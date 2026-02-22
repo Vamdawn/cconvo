@@ -10,9 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - ♻️ 集中化终端状态管理，消除四处重复的 `waitForKeypress` 实现，统一收口到 `src/utils/terminal.ts`
 - ♻️ 所有交互模块的 `process.exit(0)` 替换为 `exitApp()`，确保退出前重置终端状态
+- ♻️ TUI 清屏方式从滚动填充升级为备用屏幕缓冲区 + ANSI 擦除，消除滚动历史污染和视觉闪烁
+- ♻️ 统一所有清屏调用为集中式 `clearScreen()`，删除重复的 `scrollClear()` 和 `console.clear()`
 
 ### Fixed
 - 🐛 修复 raw mode 下按 Ctrl+C 无响应、终端状态残留不可用的问题
+- 🐛 修复 `cconvo .` 未检测到项目时提示信息一闪而过的问题
 
 ## [1.8.1] - 2026-02-17
 

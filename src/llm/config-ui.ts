@@ -11,7 +11,7 @@ import {
 } from '../utils/settings.js';
 import { testConnection } from './client.js';
 import { showInteractiveList } from '../components/interactive-list.js';
-import { waitForKeypress } from '../utils/terminal.js';
+import { waitForKeypress, clearScreen } from '../utils/terminal.js';
 import type { LLMProvider, LLMProviderType } from '../models/types.js';
 
 // 预设供应商
@@ -120,7 +120,7 @@ export async function showLLMConfig(lang: Language): Promise<void> {
 
 // 添加新供应商
 async function addNewProvider(lang: Language): Promise<void> {
-  console.clear();
+  clearScreen();
 
   // 1. 选择供应商
   const presetItems = [
@@ -250,7 +250,7 @@ async function showProviderActions(providerName: string, lang: Language): Promis
 
 // 编辑供应商
 async function editProvider(provider: LLMProvider, lang: Language): Promise<void> {
-  console.clear();
+  clearScreen();
   console.log(chalk.bold(`  ${t('llmEdit', lang)}: ${provider.name}`));
   console.log();
 

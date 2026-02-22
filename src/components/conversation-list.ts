@@ -10,7 +10,7 @@ import { analyzeConversation, formatAnalysisResult } from '../llm/analyzer.js';
 import type { Project, ConversationSummary, ExportOptions } from '../models/types.js';
 import { showBanner } from './banner.js';
 import { getLanguage, getActiveLLMProvider } from '../utils/settings.js';
-import { waitForKeypress, isCtrlC } from '../utils/terminal.js';
+import { waitForKeypress, isCtrlC, clearScreen } from '../utils/terminal.js';
 
 // 获取当前语言
 function getLang(): Language {
@@ -201,13 +201,6 @@ async function exportWithOptions(
   await waitForKeypress();
 }
 
-// 滚动清屏（将内容推上去而非截断）
-function scrollClear(): void {
-  const rows = process.stdout.rows || 24;
-  console.log('\n'.repeat(rows));
-  process.stdout.write('\x1b[H');
-}
-
 // 渲染对话列表界面
 function renderList(
   project: Project,
@@ -215,7 +208,7 @@ function renderList(
   selectedIndex: number,
   searchTerm: string
 ): void {
-  scrollClear();
+  clearScreen();
   showBanner();
 
   // 标题

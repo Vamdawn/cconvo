@@ -9,7 +9,7 @@ import { t, type Language } from './utils/i18n.js';
 import { formatSize } from './utils/format.js';
 import { getLanguage, setLanguage } from './utils/settings.js';
 import { showLLMConfig } from './llm/config-ui.js';
-import { waitForKeypress, exitApp } from './utils/terminal.js';
+import { waitForKeypress, exitApp, clearScreen, enterTUI, exitTUI } from './utils/terminal.js';
 
 // 当前语言（从配置加载）
 let currentLang: Language = getLanguage();
@@ -63,6 +63,7 @@ interface InteractiveOptions {
 
 // 交互式主程序
 export async function runInteractive(options: InteractiveOptions = {}): Promise<void> {
+  enterTUI();
   showBanner();
 
   if (options.detectProject) {
@@ -79,6 +80,7 @@ export async function runInteractive(options: InteractiveOptions = {}): Promise<
         const result = await showConversationList(currentProject);
 
         if (result.action === 'quit') {
+          exitTUI();
           console.log(chalk.gray(`\n${t('goodbye', currentLang)}`));
           return;
         }
@@ -92,6 +94,8 @@ export async function runInteractive(options: InteractiveOptions = {}): Promise<
       }
     } else {
       spinner.info(t('noProjectDetected', currentLang));
+      console.log(chalk.gray(`  ${t('pressAnyKeyToReturn', currentLang)}`));
+      await waitForKeypress();
     }
   }
 
@@ -110,6 +114,7 @@ export async function runInteractive(options: InteractiveOptions = {}): Promise<
         await showSettings();
         break;
       case 'quit':
+        exitTUI();
         console.log(chalk.gray(`\n${t('goodbye', currentLang)}`));
         return;
       case 'continue':
@@ -185,7 +190,7 @@ async function showStatistics(): Promise<void> {
   const result = await scanProjects();
   spinner.stop();
 
-  console.clear();
+  clearScreen();
   showBanner();
 
   console.log(chalk.bold(`  📊 ${t('statistics', currentLang)}`));

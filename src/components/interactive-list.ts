@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import readline from 'readline';
 import { showBanner } from './banner.js';
 import { t, type Language } from '../utils/i18n.js';
-import { waitForKeypress, isCtrlC } from '../utils/terminal.js';
+import { waitForKeypress, isCtrlC, clearScreen } from '../utils/terminal.js';
 
 // 列表项
 export interface ListItem {
@@ -38,13 +38,6 @@ export interface ListResult {
   item?: ListItem;
 }
 
-// 滚动清屏
-function scrollClear(): void {
-  const rows = process.stdout.rows || 24;
-  console.log('\n'.repeat(rows));
-  process.stdout.write('\x1b[H');
-}
-
 // 构建快捷键提示
 function buildShortcutsHint(shortcuts: ListShortcut[], isSearchMode: boolean, lang: Language): string {
   if (isSearchMode) {
@@ -66,7 +59,7 @@ function renderList(
   shortcuts: ListShortcut[],
   lang: Language
 ): void {
-  scrollClear();
+  clearScreen();
 
   if (config.showBanner !== false) {
     showBanner();
