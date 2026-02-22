@@ -1,105 +1,31 @@
-# cconvo Development Guidelines
+## Tech Stack
 
-## Development Environment
+- **Language**: TypeScript (ES2022, strict mode, ESM)
+- **Runtime**: Node.js >= 18.0.0
+- **Package Manager**: pnpm
+- **Build**: tsc
+- **Dev Runner**: tsx
+- **Test**: Vitest, @vitest/coverage-v8, memfs
+- **Lint**: ESLint
+- **CLI Framework**: commander
+- **Terminal UI**: chalk, ora, cli-table3
+- **Templating**: handlebars (HTML export)
+- **Date**: dayjs
+- **i18n**: Custom (English / Chinese)
 
-- Node.js >= 18.0.0
-- pnpm
+## Critical Rules
 
-## Code Standards
+### Testing Strategy
 
-### Naming Conventions
+- **TDD**: Write tests first
+- **80% minimum coverage**
+- **Unit tests** for utilities
+- **Integration tests** for APIs
+- **E2E tests** for critical flows
 
-| Type | Convention | Example |
-|------|------------|---------|
-| File names | kebab-case | `path-utils.ts` |
-| Functions | camelCase | `scanProjects()` |
-| Constants | UPPER_SNAKE_CASE | `PROJECTS_DIR` |
-| Types/Interfaces | PascalCase | `MessageRecord` |
+## Git Workflow
 
-### TypeScript Standards
-
-- Strict mode (`strict: true`)
-- ES Module, use `.js` suffix for imports
-- Use `import type` for type imports
-- Avoid `any`, use `unknown` when necessary
-
-### Comment Standards
-
-- Use Chinese comments
-- Keep comments concise and place above code
-
-### Import Order
-
-1. Node.js built-in modules
-2. Third-party libraries
-3. Local modules (type imports first)
-
-## Git Commit Standards
-
-Format: `<emoji> <type>: <description>`
-
-| Emoji | Type | Description |
-|-------|------|-------------|
-| ✨ | feat | New feature |
-| 🐛 | fix | Bug fix |
-| 📝 | docs | Documentation update |
-| ♻️ | refactor | Code refactoring |
-| ⚡️ | perf | Performance optimization |
-| 🔧 | config | Configuration change |
-| ⬆️ | deps | Dependency update |
-
-### Pre-commit Checklist
-
-**Important**: Before every `git commit` (including `/commit` slash commands), you must:
-
-1. Check if changes need to be recorded in CHANGELOG
-2. If yes, update the `[Unreleased]` section in `CHANGELOG.md`
-3. Commit CHANGELOG changes together with code changes
-
-## CHANGELOG Maintenance
-
-Based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/).
-
-### Core Principles
-
-- CHANGELOG is for **humans**, making it easy to understand version changes
-- Latest version first, sorted in reverse chronological order
-- Each version includes release date (YYYY-MM-DD format)
-
-### Change Categories
-
-Organize in the following order, only include categories that exist:
-
-| Category | Description | Commit Type |
-|----------|-------------|-------------|
-| Added | New features | ✨ feat |
-| Changed | Changes to existing features | ♻️ refactor, ⚡️ perf |
-| Deprecated | Features to be removed | - |
-| Removed | Removed features | - |
-| Fixed | Bug fixes | 🐛 fix |
-| Security | Security vulnerability fixes | 🔒 security |
-
-### Update Process
-
-1. **During development**: After each commit, add record under `[Unreleased]` in appropriate category
-2. **On release**:
-   - Move `[Unreleased]` content to new version `[x.y.z] - YYYY-MM-DD`
-   - Create new empty `[Unreleased]` section
-   - Create git tag `vx.y.z`
-
-### Format Example
-
-```markdown
-## [Unreleased]
-
-### Added
-- ✨ Add XXX feature
-
-## [1.0.0] - 2025-01-15
-
-### Added
-- ✨ Add YYY feature
-
-### Fixed
-- 🐛 Fix ZZZ issue
-```
+- Prefer using the relevant skill for commits
+- Otherwise follow Conventional Commits with types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `revert`
+- Commit messages must be written in English
+- All tests must pass before merge
