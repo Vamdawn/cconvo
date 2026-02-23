@@ -30,8 +30,8 @@ describe('release-it 配置', () => {
     expect(pkg.scripts.release).toBe('release-it');
   });
 
-  it('engines.node 应为 >=20.0.0', () => {
-    expect(pkg.engines.node).toBe('>=20.0.0');
+  it('engines.node 应为 >=22.0.0', () => {
+    expect(pkg.engines.node).toBe('>=22.0.0');
   });
 
   it('.release-it.json 应存在且包含正确配置', () => {

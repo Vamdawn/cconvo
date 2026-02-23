@@ -28,10 +28,10 @@ describe('CI workflow', () => {
     expect(content).toContain('branches: [main]');
   });
 
-  it('ci.yml 应使用 ubuntu-latest 和 node 20/22 矩阵', () => {
+  it('ci.yml 应使用 ubuntu-latest 和 node 22', () => {
     const content = readFileSync(CI_YML_PATH, 'utf-8');
     expect(content).toContain('runs-on: ubuntu-latest');
-    expect(content).toContain('node-version: [20, 22]');
+    expect(content).toContain('node-version: 22');
   });
 
   it('ci.yml 应使用 actions/checkout@v4', () => {
@@ -66,8 +66,9 @@ describe('CI workflow', () => {
     expect(content).toContain('run: pnpm test:coverage');
   });
 
-  it('ci.yml 应使用 matrix.node-version 模板变量', () => {
+  it('ci.yml 应包含 Codecov 上传步骤', () => {
     const content = readFileSync(CI_YML_PATH, 'utf-8');
-    expect(content).toContain('${{ matrix.node-version }}');
+    expect(content).toContain('uses: codecov/codecov-action@v5');
+    expect(content).toContain('coverage/lcov.info');
   });
 });
