@@ -2,7 +2,6 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { generateCompletion } from '../completion.js';
 import type { ShellType } from '../completion.js';
 
 // 补全初始化代码的标记

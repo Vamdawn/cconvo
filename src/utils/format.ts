@@ -183,20 +183,22 @@ export function summarizeToolCall(tool: ToolUseBlock): ToolCallSummary {
     case 'Bash':
       summary = (input as { command?: string }).command || '';
       break;
-    case 'Task':
+    case 'Task': {
       const taskInput = input as { subagent_type?: string; description?: string };
       summary = `${taskInput.subagent_type || ''}: ${taskInput.description || ''}`;
       break;
+    }
     case 'WebFetch':
       summary = (input as { url?: string }).url || '';
       break;
     case 'WebSearch':
       summary = (input as { query?: string }).query || '';
       break;
-    case 'LSP':
+    case 'LSP': {
       const lspInput = input as { operation?: string; filePath?: string };
       summary = `${lspInput.operation || ''} ${lspInput.filePath || ''}`;
       break;
+    }
     case 'NotebookEdit':
       summary = (input as { notebook_path?: string }).notebook_path || '';
       break;

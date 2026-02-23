@@ -1,8 +1,5 @@
 // Shell 自动补全脚本生成器
 
-const COMMANDS = ['list', 'export', 'stats', 'completion', 'completion:setup', 'completion:uninstall'];
-const FORMATS = ['markdown', 'json', 'html'];
-
 // Bash 补全脚本
 export function generateBashCompletion(): string {
   return `# cconvo bash completion

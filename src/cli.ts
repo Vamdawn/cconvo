@@ -5,11 +5,10 @@ import Table from 'cli-table3';
 import { scanProjects, findConversation, AmbiguousSessionIdError } from './core/scanner.js';
 import { parseConversation } from './core/parser.js';
 import { exportConversation, getFileExtension } from './exporters/index.js';
-import { formatDateTime, formatSize, formatTokens } from './utils/format.js';
-import { generateCompletion, getInstallInstructions } from './completion.js';
+import { formatDateTime, formatSize } from './utils/format.js';
+import { generateCompletion } from './completion.js';
 import {
   detectShell,
-  getShellRcFile,
   isCompletionInstalled,
   installCompletion,
   uninstallCompletion,
