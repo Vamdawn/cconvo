@@ -16,7 +16,7 @@
   },
   "files": [
     "dist",
-    "scripts",
+    "scripts/postinstall.js",
     "README.md"
   ],
   "scripts": {
