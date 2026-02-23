@@ -1,0 +1,42 @@
+{
+  "git": {
+    "commitMessage": "🔖 release: v${version}",
+    "tagName": "v${version}",
+    "tagAnnotation": "Release v${version}",
+    "push": true,
+    "requireCleanWorkingDir": true,
+    "addUntrackedFiles": true
+  },
+  "npm": {
+    "publish": false
+  },
+  "hooks": {
+    "after:@release-it/conventional-changelog:beforeRelease": "npx tsx scripts/translate-changelog.ts",
+    "after:release": "pnpm publish --no-git-checks"
+  },
+  "github": {
+    "release": true,
+    "releaseName": "v${version}"
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": {
+        "name": "conventionalcommits",
+        "types": [
+          { "type": "feat", "section": "✨ Features" },
+          { "type": "fix", "section": "🐛 Bug Fixes" },
+          { "type": "perf", "section": "⚡ Performance" },
+          { "type": "refactor", "section": "♻️ Refactoring" },
+          { "type": "docs", "section": "📝 Documentation" },
+          { "type": "style", "section": "💄 Styles", "hidden": true },
+          { "type": "chore", "section": "🔧 Chores", "hidden": true },
+          { "type": "test", "section": "✅ Tests", "hidden": true },
+          { "type": "ci", "section": "🔄 CI", "hidden": true },
+          { "type": "revert", "section": "⏪ Reverts" }
+        ]
+      },
+      "infile": "CHANGELOG.md",
+      "header": "# Changelog"
+    }
+  }
+}

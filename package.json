@@ -28,6 +28,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "release": "release-it",
     "prepublishOnly": "pnpm build && pnpm typecheck",
     "postinstall": "node scripts/postinstall.js"
   },
@@ -60,16 +61,18 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
+    "@release-it/conventional-changelog": "^10.0.5",
     "@types/node": "^22.10.5",
     "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^9.39.3",
     "memfs": "^4.56.10",
+    "release-it": "^19.2.4",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.56.0",
     "vitest": "^4.0.18"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }
