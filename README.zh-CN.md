@@ -2,6 +2,11 @@
 
 # CConvo
 
+[![npm version](https://img.shields.io/npm/v/@vamdawn/cconvo)](https://www.npmjs.com/package/@vamdawn/cconvo)
+[![license](https://img.shields.io/npm/l/@vamdawn/cconvo)](https://github.com/Vamdawn/cconvo/blob/main/LICENSE)
+[![CI](https://github.com/Vamdawn/cconvo/actions/workflows/ci.yml/badge.svg)](https://github.com/Vamdawn/cconvo/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Vamdawn/cconvo/branch/main/graph/badge.svg)](https://codecov.io/gh/Vamdawn/cconvo)
+
 交互式 CLI 工具，用于浏览和导出 Claude Code 本地保存的对话记录。
 
 ## 功能特性
